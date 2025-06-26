@@ -60,7 +60,7 @@ class ThemeController extends Controller
                     break;
             }
         }
-
+        /** @var \Illuminate\Pagination\LengthAwarePaginator $users */
         $users = $query->paginate(10);
         $skills = Skill::with(['classification'])->get();
         $classifications = Classification::all();
@@ -69,7 +69,7 @@ class ThemeController extends Controller
         if ($request->ajax()) {
             return response()->json([
                 'html' => view('theme.partials.users_grid', ['users' => $users])->render(),
-                'pagination' => $users->links()->toHtml()
+                'pagination' => $users->links('pagination::bootstrap-5')->toHtml()
             ]);
         }
 

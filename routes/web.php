@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ThemeController;
@@ -45,15 +46,22 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/api/skills', [ProfileController::class, 'getSkills'])->name('api.skills');
     Route::get('/api/languages', [ProfileController::class, 'getLanguages'])->name('api.languages');
+    Route::put('/profile/qualifications', [ProfileController::class, 'updateQualifications'])
+        ->name('profile.update-qualifications');
 
     // ================= Invitation ===============
     Route::get('/invitations', [InvitationController::class, 'index'])->name('invitations.index');
     Route::post('/invitations/send', [InvitationController::class, 'send'])->name('invitations.send');
     Route::post('/invitations/{invitation}/reply', [InvitationController::class, 'reply'])->name('invitations.reply');
-
 });
 
 Route::get('/invitation/check-eligibility', [InvitationController::class, 'checkEligibility'])->name('invitations.check');
+
+
+
+// contact us routes
+Route::post('/contact', [ContactController::class, 'submit'])->name('contact.submit');
+
 
 
 require __DIR__ . '/auth.php';

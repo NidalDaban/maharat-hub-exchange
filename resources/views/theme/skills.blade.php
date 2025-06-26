@@ -121,11 +121,10 @@
                                 </div>
                             </div>
 
-                            <div class="filter-actions mt-3">
-                                <button type="submit" class="btn btn-primary w-100">تطبيق الفلاتر</button>
+                            {{-- <div class="filter-actions mt-3">
                                 <a href="{{ route('theme.skills') }}" class="btn btn-outline-secondary w-100 mt-2">إعادة
                                     تعيين</a>
-                            </div>
+                            </div> --}}
                         </div>
                     </div>
 
@@ -155,16 +154,16 @@
                             </div>
                         </div>
 
-                        <div class="talent-grid">
+                        {{-- <div class="talent-grid"> --}}
+                        <div id="users-container" class="users-container">
                             @include('theme.partials.users_grid', ['users' => $users])
                         </div>
 
-                            <!-- Add pagination links below the talent-grid -->
-                            <div class="mt-4 pagination-container" id="pagination-links">
-                                {{ $users->links() }}
-                            </div>
+                        <!-- Add pagination links below the talent-grid -->
+                        <div id="pagination-links" class="mt-4">
+                            {{ $users->links('pagination::bootstrap-5') }}
+                        </div>
 
-                            
                     </div>
                 </div>
             </form>

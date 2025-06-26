@@ -45,12 +45,10 @@ class User extends Authenticatable
 
     public function skills()
     {
-        // return $this->belongsToMany(Skill::class, 'user_skills');
-
         return $this->belongsToMany(Skill::class, 'user_skills')
             ->using(UserSkill::class)
-            ->withPivot('description') // so Laravel fetches the extra pivot field
-            ->withTimestamps(); // optional, if you need created_at/updated_at
+            ->withPivot('description')
+            ->withTimestamps();
     }
 
     public function languages()

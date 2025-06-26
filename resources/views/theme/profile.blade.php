@@ -67,7 +67,7 @@
                             <h4 class="section-title">المهارات</h4>
                             <div class="section-content">
                                 @if ($user->skills->count() > 0)
-                                    <ul class="skills-list list-unstyled row row-cols-2 row-cols-md-3 g-2">
+                                    <ul class="skills-list list-unstyled column row-cols-2 row-cols-md-3 g-2">
                                         @foreach ($user->skills as $skill)
                                             <li class="col">
                                                 <div class="skill-item p-2">

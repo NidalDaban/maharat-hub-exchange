@@ -44,7 +44,7 @@
 
 
                     <!-- Form Section -->
-                    <div class="col-lg-8">
+                    {{-- <div class="col-lg-8">
                         <form action="forms/contact.php" method="post" class="php-email-form p-4" data-aos="fade-up"
                             data-aos-delay="200" style="border: 1px solid #333; border-radius: 0.25rem;">
                             <div class="row gy-4">
@@ -86,6 +86,85 @@
                                     <div class="loading">جاري الإرسال...</div>
                                     <div class="error-message"></div>
                                     <div class="sent-message">تم إرسال رسالتك. شكرًا لك!</div>
+                                    <button type="submit" class="btn btn-primary">إرسال</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div> --}}
+
+                    <!-- Form Section -->
+                    <div class="col-lg-8">
+                        <form action="{{ route('contact.submit') }}" method="POST" class="p-4"
+                            style="border: 1px solid #333; border-radius: 0.25rem;">
+                            @csrf
+
+                            <div class="row gy-4">
+                                <div class="col-md-6">
+                                    <input type="text" name="first_name"
+                                        class="form-control @error('first_name') is-invalid @enderror"
+                                        placeholder="الاسم الأول" value="{{ old('first_name') }}" required>
+                                    @error('first_name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-md-6">
+                                    <input type="text" name="last_name"
+                                        class="form-control @error('last_name') is-invalid @enderror"
+                                        placeholder="الاسم الأخير" value="{{ old('last_name') }}" required>
+                                    @error('last_name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-md-6">
+                                    <input type="email" name="email"
+                                        class="form-control @error('email') is-invalid @enderror"
+                                        placeholder="البريد الإلكتروني" value="{{ old('email') }}" required>
+                                    @error('email')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-md-6">
+                                    <input type="text" name="phone"
+                                        class="form-control @error('phone') is-invalid @enderror" placeholder="رقم الهاتف"
+                                        value="{{ old('phone') }}">
+                                    @error('phone')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-md-12">
+                                    <select name="service" class="form-control @error('service') is-invalid @enderror"
+                                        required>
+                                        <option value="" selected disabled>اختر الخدمة</option>
+                                        <option value="collaboration"
+                                            {{ old('service') == 'collaboration' ? 'selected' : '' }}>تعاون معنا</option>
+                                        <option value="Complaints" {{ old('service') == 'Complaints' ? 'selected' : '' }}>
+                                            شكاوى</option>
+                                        <option value="note" {{ old('service') == 'note' ? 'selected' : '' }}>اقتراحات
+                                        </option>
+                                    </select>
+                                    @error('service')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-md-12">
+                                    <textarea class="form-control @error('message') is-invalid @enderror" name="message" rows="6"
+                                        placeholder="الرسالة..." required>{{ old('message') }}</textarea>
+                                    @error('message')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-md-12 text-center">
+                                    @if (session('success'))
+                                        <div class="alert alert-success">
+                                            {{ session('success') }}
+                                        </div>
+                                    @endif
                                     <button type="submit" class="btn btn-primary">إرسال</button>
                                 </div>
                             </div>

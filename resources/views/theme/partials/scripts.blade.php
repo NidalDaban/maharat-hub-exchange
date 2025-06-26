@@ -285,3 +285,182 @@
         }
     });
 </script>
+
+{{-- Skills Pagination --}}
+{{-- <script>
+    // Handle AJAX pagination clicks
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.pagination a')) {
+            e.preventDefault();
+            const url = e.target.closest('a').getAttribute('href');
+
+            document.getElementById('users-container').innerHTML =
+                '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">جار التحميل...</span></div></div>';
+
+            fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('users-container').innerHTML = data.html;
+                    document.getElementById('pagination-links').innerHTML = data.pagination;
+
+                    // Reinitialize JS features if needed
+                    initializeInvitationForms();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('users-container').innerHTML =
+                        '<div class="col-12 text-center py-5"><h4>حدث خطأ أثناء جلب البيانات</h4></div>';
+                });
+        }
+    });
+</script> --}}
+
+
+{{-- Skills Pagination + Invitation Init --}}
+<script>
+    // Global invitation initialization function
+    function initializeInvitationForms() {
+        // Remove old listeners to prevent duplication
+        document.querySelectorAll('.invite-btn').forEach(btn => {
+            btn.removeEventListener('click', handleInviteClick); // detach if already exists
+            btn.addEventListener('click', handleInviteClick); // attach fresh
+        });
+    }
+
+    // Define the actual event handler
+    function handleInviteClick(e) {
+        const userId = e.currentTarget.getAttribute('data-user-id');
+        console.log('Invitation clicked for user:', userId);
+
+        // You can replace this with actual logic (e.g., show modal, send AJAX)
+        alert('دعوة المستخدم رقم: ' + userId);
+    }
+
+    // Run once on initial page load
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeInvitationForms();
+    });
+
+    // Handle AJAX pagination
+    document.addEventListener('click', function(e) {
+        const link = e.target.closest('.pagination a');
+        if (link) {
+            e.preventDefault();
+            const url = link.getAttribute('href');
+
+            document.getElementById('users-container').innerHTML =
+                '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">جار التحميل...</span></div></div>';
+
+            fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('users-container').innerHTML = data.html;
+                    document.getElementById('pagination-links').innerHTML = data.pagination;
+
+                    // Reinitialize functionality on new elements
+                    initializeInvitationForms();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('users-container').innerHTML =
+                        '<div class="col-12 text-center py-5"><h4>حدث خطأ أثناء جلب البيانات</h4></div>';
+                });
+        }
+    });
+</script>
+
+
+{{-- Skills Pagination and Filter Reset via AJAX --}}
+{{-- <script>
+    function initializeInvitationForms() {
+        // You can re-initialize tooltips, modals, etc., here if needed
+        console.log('Invitation forms initialized.');
+    }
+
+    document.addEventListener('click', function(e) {
+        const paginationLink = e.target.closest('.pagination a');
+        const resetLink = e.target.closest('a[href="{{ route('theme.skills') }}"]');
+
+        // AJAX Pagination
+        if (paginationLink) {
+            e.preventDefault();
+            const url = paginationLink.getAttribute('href');
+            fetchSkillsData(url);
+        }
+
+        // AJAX Reset
+        if (resetLink) {
+            e.preventDefault();
+            fetchSkillsData("{{ route('theme.skills') }}");
+        }
+    });
+
+    function fetchSkillsData(url) {
+        document.getElementById('users-container').innerHTML =
+            '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">جار التحميل...</span></div></div>';
+        document.getElementById('pagination-links').innerHTML = '';
+
+        fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('users-container').innerHTML = data.html;
+                document.getElementById('pagination-links').innerHTML = data.pagination;
+
+                // Reinitialize anything necessary
+                initializeInvitationForms();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('users-container').innerHTML =
+                    '<div class="col-12 text-center py-5"><h4>حدث خطأ أثناء جلب البيانات</h4></div>';
+            });
+    }
+</script> --}}
+
+
+<script>
+    $(document).ready(function() {
+        // Handle form submission
+        $('form').on('submit', function(e) {
+            e.preventDefault();
+            const form = $(this);
+
+            // Show loading state
+            form.find('button[type="submit"]').prop('disabled', true).html(`
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                جاري الإرسال...
+            `);
+
+            // Submit form via AJAX
+            $.ajax({
+                url: form.attr('action'),
+                method: form.attr('method'),
+                data: form.serialize(),
+                success: function(response) {
+                    // If form was submitted with AJAX (optional)
+                    if (response.redirect) {
+                        window.location.href = response.redirect;
+                    }
+                },
+                error: function(xhr) {
+                    // Handle errors if using AJAX
+                    form.find('button[type="submit"]').prop('disabled', false).text(
+                        'إرسال');
+                    alert('حدث خطأ أثناء إرسال النموذج. يرجى المحاولة مرة أخرى.');
+                }
+            });
+        });
+    });
+</script>

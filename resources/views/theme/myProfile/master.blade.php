@@ -324,6 +324,12 @@
                                 <i class="fas fa-edit me-2"></i>تعديل الملف
                             </a>
                         </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="#qualifications" data-bs-toggle="tab">
+                                <i class="fas fa-graduation-cap me-2"></i>المؤهلات
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -769,6 +775,57 @@
                         </form>
                     </div>
 
+                    <!-- Qualifications Tab -->
+                    <div class="tab-pane fade" id="qualifications">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2 class="fw-bold text-primary">
+                                <i class="fas fa-graduation-cap me-2"></i>المؤهلات والخبرات
+                            </h2>
+                            <button class="btn btn-primary d-lg-none ms-2" id="mobileSidebarToggle3">
+                                <i class="fas fa-bars"></i> القائمة
+                            </button>
+                        </div>
+
+                        <form id="qualificationsForm" method="POST"
+                            action="{{ route('profile.update-qualifications') }}">
+                            @csrf
+                            @method('PUT')
+
+                            <div class="card mb-4" style="width: 80%">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-white">وصف المهارات والخبرات</h6>
+                                </div>
+                                <div class="card-body">
+                                    @if ($user->skills->count() > 0)
+                                        <ul class="list-group list-group-flush">
+                                            @foreach ($user->skills as $skill)
+                                                <li class="list-group-item">
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">{{ $skill->name }}</label>
+                                                        <textarea class="form-control skill-description" name="skills[{{ $skill->id }}][description]" rows="4"
+                                                            placeholder="أدخل وصفاً لمهارتك وخبراتك في هذا المجال">{{ $skill->pivot->description ?? '' }}</textarea>
+                                                    </div>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @else
+                                        <div class="alert alert-info">
+                                            لا توجد مهارات محددة. يرجى إضافة مهارات أولاً من صفحة تعديل الملف الشخصي.
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+
+                            @if ($user->skills->count() > 0)
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-save me-1"></i> حفظ التغييرات
+                                    </button>
+                                </div>
+                            @endif
+                        </form>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -954,7 +1011,7 @@
             const skillsPerPage = 10;
             let currentSkillsPage = 1;
             let filteredSkills = @json($skills);
-            let allSelectedSkills = @json($user->skills->pluck('id')->toArray());
+            let allSelectedSkills = @json($user->skills->pluck('id')->toArray()) || [];
 
             $('#skillFilterType').change(function() {
                 const filterType = $(this).val();
@@ -1081,7 +1138,10 @@
             let currentLanguagesPage = 1;
             let filteredLanguages = @json($languages);
             let allLanguagesData = @json($languages);
-            let selectedLanguages = {};
+            let selectedLanguages = @json(
+                $user->languages->mapWithKeys(function ($lang) {
+                        return [$lang->id => ['selected' => true, 'level' => $lang->pivot->level]];
+                    })->toArray()) || {};
 
             @foreach ($user->languages as $lang)
                 selectedLanguages[{{ $lang->id }}] = {
@@ -1231,16 +1291,32 @@
             // ======================
             // Form Submission
             // ======================
+
             $('#profileForm').on('submit', function(e) {
                 e.preventDefault();
                 const form = this;
 
+                // Clear previous dynamic inputs
+                $('.dynamic-skill-input').remove();
+                $('.dynamic-language-input').remove();
+
+                // Validate languages before submission
                 const invalidLanguages = [];
+                const validLanguagesData = {};
+
                 Object.keys(selectedLanguages).forEach(langId => {
+                    const langIdNum = parseInt(langId);
+                    if (isNaN(langIdNum) || langIdNum <= 0) return;
+
                     if (!selectedLanguages[langId].level) {
                         const langName = allLanguagesData.find(l => l.id == langId)?.name ||
                             'Unknown';
                         invalidLanguages.push(langName);
+                    } else {
+                        validLanguagesData[langId] = {
+                            selected: true,
+                            level: selectedLanguages[langId].level
+                        };
                     }
                 });
 
@@ -1254,39 +1330,25 @@
                     return false;
                 }
 
-                $('.dynamic-skill-input').remove();
-                $('.dynamic-language-input').remove();
+                // Add skills input
+                $('<input>')
+                    .attr({
+                        type: 'hidden',
+                        name: 'skills_data',
+                        value: JSON.stringify(allSelectedSkills.filter(id => id > 0)),
+                        class: 'dynamic-skill-input'
+                    })
+                    .appendTo(form);
 
-                allSelectedSkills.forEach(skillId => {
-                    $('<input>')
-                        .attr({
-                            type: 'hidden',
-                            name: `skills[${skillId}]`,
-                            value: skillId,
-                            class: 'dynamic-skill-input'
-                        })
-                        .appendTo(form);
-                });
-
-                Object.keys(selectedLanguages).forEach(langId => {
-                    $('<input>')
-                        .attr({
-                            type: 'hidden',
-                            name: `languages[${langId}][selected]`,
-                            value: '1',
-                            class: 'dynamic-language-input'
-                        })
-                        .appendTo(form);
-
-                    $('<input>')
-                        .attr({
-                            type: 'hidden',
-                            name: `languages[${langId}][level]`,
-                            value: selectedLanguages[langId].level,
-                            class: 'dynamic-language-input'
-                        })
-                        .appendTo(form);
-                });
+                // Add validated languages input
+                $('<input>')
+                    .attr({
+                        type: 'hidden',
+                        name: 'languages_data',
+                        value: JSON.stringify(validLanguagesData),
+                        class: 'dynamic-language-input'
+                    })
+                    .appendTo(form);
 
                 Swal.fire({
                     title: 'هل أنت متأكد؟',
@@ -1319,6 +1381,64 @@
                     confirmButtonColor: '#4e73df'
                 });
             @endif
+
+            // ======================
+            // Qualifications Form Submission
+            // ======================
+            $('#qualificationsForm').on('submit', function(e) {
+                e.preventDefault();
+                const form = this;
+
+                Swal.fire({
+                    title: 'هل أنت متأكد؟',
+                    text: "سيتم حفظ التغييرات التي أجريتها على مؤهلاتك",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#4e73df',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'نعم، احفظ',
+                    cancelButtonText: 'إلغاء'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Show loading indicator
+                        Swal.fire({
+                            title: 'جاري الحفظ',
+                            html: 'الرجاء الانتظار...',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        // Submit form via AJAX
+                        $.ajax({
+                            url: form.action,
+                            method: form.method,
+                            data: $(form).serialize(),
+                            success: function(response) {
+                                Swal.fire({
+                                    title: 'تم!',
+                                    text: 'تم تحديث المؤهلات بنجاح',
+                                    icon: 'success',
+                                    confirmButtonColor: '#4e73df'
+                                });
+                            },
+                            error: function(xhr) {
+                                let errorMessage = 'حدث خطأ أثناء حفظ التغييرات';
+                                if (xhr.responseJSON && xhr.responseJSON.message) {
+                                    errorMessage = xhr.responseJSON.message;
+                                }
+                                Swal.fire({
+                                    title: 'خطأ!',
+                                    text: errorMessage,
+                                    icon: 'error',
+                                    confirmButtonColor: '#4e73df'
+                                });
+                            }
+                        });
+                    }
+                });
+            });
         });
     </script>
 

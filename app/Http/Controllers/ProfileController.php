@@ -40,7 +40,6 @@ class ProfileController extends Controller
 
     public function edit(Request $request): View
     {
-
         return view('profile.edit', [
             'user' => $request->user(),
         ]);
@@ -72,20 +71,27 @@ class ProfileController extends Controller
 
         $user->save();
 
-        if ($request->has('skills')) {
-            $selectedSkills = array_keys(array_filter($request->skills));
-            $user->skills()->sync($selectedSkills);
+        // Handle skills - ensure we only sync positive integers
+        $skillsData = json_decode($request->input('skills_data'), true) ?? [];
+        $validSkills = array_filter($skillsData, function ($id) {
+            return is_numeric($id) && $id > 0;
+        });
+        $user->skills()->sync($validSkills);
+
+        // Handle languages - validate structure before syncing
+        $languagesData = json_decode($request->input('languages_data'), true) ?? [];
+        $languagesSyncData = [];
+
+        foreach ($languagesData as $langId => $data) {
+            $langId = (int)$langId;
+            if ($langId <= 0) continue;
+
+            if (isset($data['level']) && !empty($data['level'])) {
+                $languagesSyncData[$langId] = ['level' => $data['level']];
+            }
         }
 
-        if ($request->has('languages')) {
-            $languagesWithLevels = [];
-            foreach ($request->languages as $languageId => $data) {
-                if (isset($data['selected'])) {
-                    $languagesWithLevels[$languageId] = ['level' => $data['level'] ?? null];
-                }
-            }
-            $user->languages()->sync($languagesWithLevels);
-        }
+        $user->languages()->sync($languagesSyncData);
 
         return Redirect::route('myProfile')->with('success', 'تم تحديث المعلومات بنجاح!');
     }
@@ -126,8 +132,6 @@ class ProfileController extends Controller
 
         return response()->json(['success' => true]);
     }
-
-
 
     public function getSkills(Request $request)
     {
@@ -175,6 +179,22 @@ class ProfileController extends Controller
             'total' => $languages->total(),
             'current_page' => $languages->currentPage(),
             'last_page' => $languages->lastPage(),
+        ]);
+    }
+
+    public function updateQualifications(Request $request)
+    {
+        $user = $request->user();
+        $skillsData = $request->input('skills', []);
+
+        foreach ($skillsData as $skillId => $data) {
+            $user->skills()->updateExistingPivot($skillId, [
+                'description' => $data['description'] ?? null
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'تم تحديث المؤهلات بنجاح'
         ]);
     }
 
