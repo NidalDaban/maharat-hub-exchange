@@ -23,7 +23,7 @@
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-                        <li><a class="dropdown-item" href="">المحادثات</a></li>
+                        <li><a class="dropdown-item" href="{{ route('conversations.index') }}">المحادثات</a></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>

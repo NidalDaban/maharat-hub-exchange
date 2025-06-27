@@ -21,9 +21,7 @@
                 <div class="col-lg-8 mx-auto">
                     <div class="profile-card">
                         <!-- Profile Header with Right-Aligned Image -->
-                        {{-- <div class="profile-header d-flex justify-content-between align-items-start"> --}}
                         <div class="profile-header d-flex flex-row-reverse justify-content-between align-items-start">
-
                             <div class="profile-info flex-grow-1">
                                 <h2 class="profile-name mb-1">{{ $user->fullName() }}</h2>
                                 <p class="profile-location mb-2 text-muted">
@@ -41,17 +39,22 @@
                                     </span>
                                 </div>
                                 <div class="profile-rating mt-2">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="progress" style="height: 6px; width: 100px;">
-                                            <div class="progress-bar bg-success" style="width: 96%"></div>
-                                        </div>
-                                        <small class="text-muted">96% نجاح الوظائف</small>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="text-success">
+                                            <i class="bi bi-check-circle-fill"></i>
+                                            {{ $user->receivedInvitations()->where('reply', 'قبول')->count() }} مقبولة
+                                        </span>
+                                        <span class="text-danger">
+                                            <i class="bi bi-x-circle-fill"></i>
+                                            {{ $user->receivedInvitations()->where('reply', 'رفض')->count() }} مرفوضة
+                                        </span>
                                     </div>
                                 </div>
                             </div>
                             <!-- Right-Aligned Profile Image -->
                             <div class="profile-image-container ms-3">
-                                <img src="{{ $user->getImageUrlAttribute() }}" alt="Profile" class="profile-avatar" style="width: 10rem; height: 10rem;">
+                                <img src="{{ $user->getImageUrlAttribute() }}" alt="Profile" class="profile-avatar"
+                                    style="width: 10rem; height: 10rem;">
                             </div>
                         </div>
 
@@ -147,17 +150,10 @@
 
         /* Profile Image - Right Aligned and Small */
         .profile-image-container {
-            /* width: 50px !important;
-                    height: 50px !important; */
             margin-left: 1rem;
-            /* margin-right: 0;
-                            margin-left: 1rem;
-                            flex-shrink: 0;
-                            text-align: right; */
         }
 
         .profile-avatar {
-            
             width: 50px;
             height: 50px;
             border-radius: 50%;

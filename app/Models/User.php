@@ -73,15 +73,6 @@ class User extends Authenticatable
             : 'https://cdn-icons-png.flaticon.com/512/4140/4140048.png';
     }
 
-    public function sentInvitations()
-    {
-        return $this->hasMany(Invitation::class, 'source_user_id');
-    }
-
-    public function receivedInvitations()
-    {
-        return $this->hasMany(Invitation::class, 'destination_user_id');
-    }
 
     public function profileCompletionPercentage()
     {
@@ -116,6 +107,23 @@ class User extends Authenticatable
         return $totalFields > 0 ? round(($filledFields / $totalFields) * 100) : 0;
     }
 
+
+    /**
+     * Invitations sent by this user.
+     */
+    public function sentInvitations()
+    {
+        return $this->hasMany(Invitation::class, 'source_user_id');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function receivedInvitations()
+    {
+        return $this->hasMany(Invitation::class, 'destination_user_id');
+    }
+
     public function sentReviews()
     {
         return $this->hasMany(Review::class, 'sender_id');
@@ -124,5 +132,37 @@ class User extends Authenticatable
     public function receivedReviews()
     {
         return $this->hasMany(Review::class, 'receved_id');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+
+    public function conversations()
+    {
+        return $this->belongsToMany(Conversation::class)
+            ->withPivot('is_active', 'left_at', 'body')
+            ->withTimestamps();
+    }
+
+    // public function conversations()
+    // {
+    //     return $this->belongsToMany(Conversation::class)
+    //         ->withPivot('is_active', 'left_at')
+    //         ->withTimestamps();
+    // }
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
+    }
+
+    public function hasConversationWith($userId)
+    {
+        return $this->conversations()
+            ->whereHas('users', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })
+            ->exists();
     }
 }

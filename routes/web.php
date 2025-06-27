@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ThemeController;
@@ -61,9 +62,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/invitation/check-eligibility', [InvitationController::class, 'checkEligibility'])
         ->name('invitations.check');
 
-    // Route::get('/invitation/check-eligibility', [InvitationController::class, 'checkEligibility'])
-    //     ->name('invitations.check')
-    //     ->middleware('auth');
+    // ================ Conversations ===============
+    Route::prefix('conversations')->name('conversations.')->group(function () {
+        Route::get('/', [ConversationController::class, 'index'])->name('index');
+        Route::get('/create', [ConversationController::class, 'create'])->name('create');
+        Route::post('/', [ConversationController::class, 'store'])->name('store');
+        Route::get('/{conversation}', [ConversationController::class, 'show'])->name('show');
+        Route::post('/{conversation}/messages', [ConversationController::class, 'storeMessage'])->name('messages.store');
+        Route::post('/{conversation}/leave', [ConversationController::class, 'leave'])->name('leave');
+        Route::post('/{conversation}/review', [ConversationController::class, 'storeReview'])->name('review.store');
+    });
 });
 
 // Route::get('/invitation/check-eligibility', [InvitationController::class, 'checkEligibility'])->name('invitations.check');

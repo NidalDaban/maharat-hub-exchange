@@ -29,4 +29,9 @@ class Invitation extends Model
     {
         return $this->belongsTo(User::class, 'destination_user_id');
     }
+
+    // public function conversation()
+    // {
+    //     return $this->hasOne(Conversation::class);
+    // }
 }

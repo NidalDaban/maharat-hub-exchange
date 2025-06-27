@@ -31,99 +31,12 @@
                             </button>
                         </div>
                     </div>
-                    {{-- <div class="quick-links mt-3">
-                        <span class="me-2">ابحث سريعًا:</span>
-                        <a href="#" class="quick-link">تعليم لغات</a>
-                        <a href="#" class="quick-link">برمجة</a>
-                        <a href="#" class="quick-link">تصميم</a>
-                    </div> --}}
+                    
                 </div>
             </div>
-
-            {{-- <!-- Search/Filter Container (Added) -->
-            <div class="search-container" data-aos="fade-up" data-aos-delay="300">
-                <!-- Tabs -->
-                <div class="tabs">
-                    <button class="tab-button active">ابحث عن المهارة</button>
-                    <button class="tab-button">تصفح المهارات</button>
-                </div>
-
-                <!-- Search Bar & Filters -->
-                <div class="search-bar">
-                    <div class="search-input">
-                        <input type="text" placeholder="ابحث عن المهارة">
-                        <button class="search-button">بحث<i class="bi bi-search"></i></button>
-                    </div>
-
-                </div>
-            </div> --}}
 
         </div>
     </section>
-
-
-
-    {{-- ===================================   --}}
-    <!-- Learning, teaching, and connecting Section -->
-    {{-- <section id="learning" class="learning section">
-        <div class="container">
-            <div class="row gy-4">
-                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
-                    <img src="assets/img/about.jpg" class="img-fluid" alt="">
-                </div>
-
-                <div class="col-lg-6 content" data-aos="fade-up" data-aos-delay="200">
-                    <h3>تبادل المهارات لبناء مستقبل مشترك</h3>
-                    <p class="fst-italic">
-                        منصة "مهارات هَب" تتيح لك مشاركة مهاراتك وتعلم مهارات جديدة من الآخرين بسهولة وفعالية.
-                    </p>
-                    <ul>
-                        <li><i class="bi bi-check-circle"></i> <span>شارك مهاراتك مع أشخاص يحتاجون إليها ويقدّرونها.</span>
-                        </li>
-                        <li><i class="bi bi-check-circle"></i> <span>استفد من خبرات الآخرين في مختلف المجالات.</span></li>
-                        <li><i class="bi bi-check-circle"></i> <span>ابنِ شبكة تواصل مهنية تعتمد على التبادل والتعاون
-                                المستدام.</span></li>
-                    </ul>
-                    <a href="#" class="read-more"><span>اكتشف المزيد</span><i class="bi bi-arrow-left"></i></a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- About Section -->
-    <section id="about" class="about section">
-        <div class="container">
-            <div class="row gy-4">
-
-                <div class="col-lg-6 order-1 order-lg-2" data-aos="fade-up" data-aos-delay="100">
-                    <img src="assets/img/about.jpg" class="img-fluid" alt="">
-                </div>
-
-                <div id="about-content" class="col-lg-6 order-2 order-lg-1 content" data-aos="fade-up" data-aos-delay="200">
-                    <h3>تعلم. علَم. <span style="color: #0000ff">تواصل.</span></h3>
-                    <p class="fst-italic" style="font-style: normal !important">
-                        انضم الى قائمة انتظار مهارات هب - منصة لتبادل المهارات و التعلم من الاخرين و تعليم ما تحب. احصل على
-                        مهارات متنوعة مجانا.
-                        . وتواصل مع اشخاص يشاركونك اهتمامتك
-
-                    </p>
-
-                    <div class="container-a-about">
-                        <a href="#" class="read-more">انضم لقائمة الانتظار</a>
-                        <a href="#" class="read-more">اكتشف المزيد</a>
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-
-    </section> --}}
-    <!-- /About Section -->
-    {{-- ====================================== --}}
-
-
-
 
     <!-- Why Skills Hub Section -->
     <section id="why-skills-hub" class="why-skills-hub section">
