@@ -1,3 +1,4 @@
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <!-- Vendor JS Files -->
 <script src="{{ asset('assets') }}/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="{{ asset('assets') }}/vendor/php-email-form/validate.js"></script>
@@ -5,13 +6,12 @@
 <script src="{{ asset('assets') }}/vendor/glightbox/js/glightbox.min.js"></script>
 <script src="{{ asset('assets') }}/vendor/purecounter/purecounter_vanilla.js"></script>
 <script src="{{ asset('assets') }}/vendor/swiper/swiper-bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 
 <!-- Main JS File -->
 <script src="{{ asset('assets') }}/js/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-
+{{-- Sweet alert --}}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.invitation-form').forEach(form => {
@@ -68,45 +68,222 @@
     });
 </script>
 
+{{-- Invitation Script --}}
 <script>
-    function confirmReply(url, replyValue) {
-        Swal.fire({
-            title: 'هل أنت متأكد؟',
-            text: `هل تريد ${replyValue} هذه الدعوة؟`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'نعم',
-            cancelButtonText: 'إلغاء',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Create and submit a form dynamically
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = url;
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Invitation script loaded');
 
-                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        // Handle invitation button clicks
+        $(document).on('click', '.send-invitation-btn', function(e) {
+            e.preventDefault();
+            const form = $(this).closest('form');
+            const userName = form.data('user-name') || 'هذا المستخدم';
+            const btn = $(this);
 
-                // CSRF token
-                const tokenInput = document.createElement('input');
-                tokenInput.type = 'hidden';
-                tokenInput.name = '_token';
-                tokenInput.value = csrfToken;
+            // Force correct form action
+            form.attr('action', '{{ route('invitations.send') }}');
+            console.log('Form action set to:', form.attr('action'));
 
-                // reply value
-                const replyInput = document.createElement('input');
-                replyInput.type = 'hidden';
-                replyInput.name = 'reply';
-                replyInput.value = replyValue;
+            // Show loading state
+            btn.prop('disabled', true).html(`
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+                جاري التحقق...
+            `);
 
-                form.appendChild(tokenInput);
-                form.appendChild(replyInput);
+            // Check eligibility first
+            checkInvitationEligibility()
+                .then(response => {
+                    console.log('Eligibility check response:', response);
+                    btn.prop('disabled', false).text('دعوة');
 
-                document.body.appendChild(form);
-                form.submit();
-            }
+                    if (response.status === 'unauthenticated') {
+                        showError('يجب تسجيل الدخول أولاً لإرسال دعوات');
+                    } else if (response.status === 'incomplete') {
+                        showProfileIncompleteWarning(response.completion_percentage);
+                    } else {
+                        // Show confirmation dialog
+                        Swal.fire({
+                            title: 'إرسال دعوة',
+                            html: `هل تريد إرسال دعوة إلى <strong>${userName}</strong>؟`,
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonText: 'نعم، أرسل الدعوة',
+                            cancelButtonText: 'إلغاء',
+                            confirmButtonColor: '#4e73df',
+                            cancelButtonColor: '#d33',
+                            reverseButtons: true
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                console.log('Sending invitation to:', userName);
+                                sendInvitation(form);
+                            }
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Eligibility check error:', error);
+                    btn.prop('disabled', false).text('دعوة');
+                    showError('حدث خطأ أثناء التحقق من الأهلية');
+                });
         });
-    }
+
+        // Check eligibility function
+        function checkInvitationEligibility() {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: '{{ route('invitations.check') }}',
+                    method: 'GET',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(response) {
+                        resolve(response);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Eligibility check failed:', status, error);
+                        reject(error);
+                    }
+                });
+            });
+        }
+
+        // Show error message
+        function showError(message) {
+            Swal.fire({
+                title: 'خطأ',
+                text: message,
+                icon: 'error',
+                confirmButtonColor: '#4e73df',
+                confirmButtonText: 'حسناً'
+            });
+        }
+
+        // Show profile incomplete warning
+        function showProfileIncompleteWarning(percentage) {
+            Swal.fire({
+                title: 'ملف غير مكتمل',
+                html: `يجب إكمال ملفك الشخصي بنسبة 100% قبل إرسال الدعوات.<br>
+                      <small>إكتمال الملف الحالي: ${percentage}%</small><br>
+                      <a href="{{ route('myProfile') }}" class="btn btn-primary mt-2">الذهاب إلى الملف الشخصي</a>`,
+                icon: 'warning',
+                confirmButtonColor: '#4e73df'
+            });
+        }
+
+        // Send invitation request
+        function sendInvitation(form) {
+            const btn = form.find('button');
+            btn.prop('disabled', true).html(`
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+                جاري الإرسال...
+            `);
+
+            const requestData = {
+                _token: $('meta[name="csrf-token"]').attr('content'),
+                destination_user_id: form.find('input[name="destination_user_id"]').val()
+            };
+
+            $.ajax({
+                url: form.attr('action'),
+                method: 'POST',
+                data: requestData,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                success: function(response) {
+                    btn.prop('disabled', false).text('دعوة مرسلة');
+                    Swal.fire({
+                        title: 'تم بنجاح',
+                        text: response.message || 'تم إرسال الدعوة بنجاح!',
+                        icon: 'success',
+                        confirmButtonColor: '#4e73df',
+                        confirmButtonText: 'حسناً'
+                    });
+                },
+                error: function(xhr) {
+                    btn.prop('disabled', false).text('دعوة');
+                    let errorMessage = 'حدث خطأ أثناء إرسال الدعوة';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+                    showError(errorMessage);
+                }
+            });
+        }
+    });
+</script>
+
+{{-- Invitation Reply Script --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Invitation reply script loaded');
+
+        // Handle reply button clicks
+        $(document).on('click', '.reply-btn', function() {
+            const button = $(this);
+            const url = button.data('url');
+            const reply = button.data('reply');
+
+            Swal.fire({
+                title: 'تأكيد الرد',
+                text: `هل أنت متأكد من ${reply} الدعوة؟`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: `نعم، ${reply}`,
+                cancelButtonText: 'إلغاء',
+                confirmButtonColor: reply === 'قبول' ? '#28a745' : '#dc3545',
+                cancelButtonColor: '#6c757d',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    sendReply(url, reply, button);
+                }
+            });
+        });
+
+        // Function to send the reply
+        function sendReply(url, reply, button) {
+            const originalText = button.text();
+            button.prop('disabled', true).html(`
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+                جاري الإرسال...
+            `);
+
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    reply: reply
+                },
+                success: function(response) {
+                    Swal.fire({
+                        title: 'تم بنجاح',
+                        text: response.message || 'تم تحديث حالة الدعوة',
+                        icon: 'success',
+                        confirmButtonText: 'حسناً'
+                    }).then(() => {
+                        location.reload(); // Refresh to show updated status
+                    });
+                },
+                error: function(xhr) {
+                    button.prop('disabled', false).text(originalText);
+                    let errorMessage = 'حدث خطأ أثناء إرسال الرد';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+                    Swal.fire({
+                        title: 'خطأ',
+                        text: errorMessage,
+                        icon: 'error',
+                        confirmButtonText: 'حسناً'
+                    });
+                }
+            });
+        }
+    });
 </script>
 
 <script>
@@ -286,40 +463,6 @@
     });
 </script>
 
-{{-- Skills Pagination --}}
-{{-- <script>
-    // Handle AJAX pagination clicks
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.pagination a')) {
-            e.preventDefault();
-            const url = e.target.closest('a').getAttribute('href');
-
-            document.getElementById('users-container').innerHTML =
-                '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">جار التحميل...</span></div></div>';
-
-            fetch(url, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('users-container').innerHTML = data.html;
-                    document.getElementById('pagination-links').innerHTML = data.pagination;
-
-                    // Reinitialize JS features if needed
-                    initializeInvitationForms();
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.getElementById('users-container').innerHTML =
-                        '<div class="col-12 text-center py-5"><h4>حدث خطأ أثناء جلب البيانات</h4></div>';
-                });
-        }
-    });
-</script> --}}
-
-
 {{-- Skills Pagination + Invitation Init --}}
 <script>
     // Global invitation initialization function
@@ -378,58 +521,7 @@
 </script>
 
 
-{{-- Skills Pagination and Filter Reset via AJAX --}}
-{{-- <script>
-    function initializeInvitationForms() {
-        // You can re-initialize tooltips, modals, etc., here if needed
-        console.log('Invitation forms initialized.');
-    }
-
-    document.addEventListener('click', function(e) {
-        const paginationLink = e.target.closest('.pagination a');
-        const resetLink = e.target.closest('a[href="{{ route('theme.skills') }}"]');
-
-        // AJAX Pagination
-        if (paginationLink) {
-            e.preventDefault();
-            const url = paginationLink.getAttribute('href');
-            fetchSkillsData(url);
-        }
-
-        // AJAX Reset
-        if (resetLink) {
-            e.preventDefault();
-            fetchSkillsData("{{ route('theme.skills') }}");
-        }
-    });
-
-    function fetchSkillsData(url) {
-        document.getElementById('users-container').innerHTML =
-            '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">جار التحميل...</span></div></div>';
-        document.getElementById('pagination-links').innerHTML = '';
-
-        fetch(url, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('users-container').innerHTML = data.html;
-                document.getElementById('pagination-links').innerHTML = data.pagination;
-
-                // Reinitialize anything necessary
-                initializeInvitationForms();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('users-container').innerHTML =
-                    '<div class="col-12 text-center py-5"><h4>حدث خطأ أثناء جلب البيانات</h4></div>';
-            });
-    }
-</script> --}}
-
-
+{{-- Contact us --}}
 <script>
     $(document).ready(function() {
         // Handle form submission

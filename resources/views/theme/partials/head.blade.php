@@ -6,7 +6,6 @@
     <meta name="keywords" content="">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-
     <link
         href="https://d1csarkz8obe9u.cloudfront.net/posterpreviews/skill-logo-design-template-6677debd608907e81c75e20c66e95baf_screen.jpg?ts=1685817469"
         rel="icon">
@@ -34,6 +33,8 @@
     <link href="{{ asset('assets') }}/vendor/aos/aos.css" rel="stylesheet">
     <link href="{{ asset('assets') }}/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
     <link href="{{ asset('assets') }}/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     {{-- ============================== --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css" rel="stylesheet">

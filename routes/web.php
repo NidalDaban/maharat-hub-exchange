@@ -51,11 +51,22 @@ Route::middleware('auth')->group(function () {
 
     // ================= Invitation ===============
     Route::get('/invitations', [InvitationController::class, 'index'])->name('invitations.index');
-    Route::post('/invitations/send', [InvitationController::class, 'send'])->name('invitations.send');
+    // Route::post('/invitations/send', [InvitationController::class, 'send'])->name('invitations.send');
+
+    Route::post('/invitations/send', [InvitationController::class, 'send'])
+        ->name('invitations.send');
+
     Route::post('/invitations/{invitation}/reply', [InvitationController::class, 'reply'])->name('invitations.reply');
+
+    Route::get('/invitation/check-eligibility', [InvitationController::class, 'checkEligibility'])
+        ->name('invitations.check');
+
+    // Route::get('/invitation/check-eligibility', [InvitationController::class, 'checkEligibility'])
+    //     ->name('invitations.check')
+    //     ->middleware('auth');
 });
 
-Route::get('/invitation/check-eligibility', [InvitationController::class, 'checkEligibility'])->name('invitations.check');
+// Route::get('/invitation/check-eligibility', [InvitationController::class, 'checkEligibility'])->name('invitations.check');
 
 
 
