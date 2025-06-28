@@ -11,18 +11,10 @@ class Conversation extends Model
 
     protected $fillable = ['title', 'last_message_at'];
 
-    // public function users()
-    // {
-    //     return $this->belongsToMany(User::class)
-    //         ->withPivot('is_active', 'left_at')
-    //         ->withTimestamps();
-    // }
-
     public function users()
     {
         return $this->belongsToMany(User::class)
-            ->withPivot(['body', 'is_active', 'left_at', 'read_at', 'created_at', 'updated_at']);
-            // ->withTimestamps();
+            ->withPivot(['is_active', 'left_at', 'read_at', 'created_at', 'updated_at']);
     }
 
     public function messages()

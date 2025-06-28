@@ -28,7 +28,7 @@
                                 class="rounded-circle mb-1 me-2">
 
                             <div class="position-relative" style="display: inline-block;">
-                                <i class="fas fa-bell fa-lg text-dark"></i> {{-- FontAwesome bell --}}
+                                <i class="fas fa-bell fa-lg"></i> {{-- FontAwesome bell --}}
                                 <span id="invitation-count"
                                     class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                                     style="font-size: 0.6rem; display: none;">
@@ -37,7 +37,7 @@
                             </div>
                         </div>
 
-                        
+
 
                         <span class="d-none d-md-inline text-center"
                             style="font-size: 0.8rem;">{{ auth()->user()->fullName() ?: auth()->user()->email }}</span>

@@ -32,75 +32,91 @@ class ConversationController extends Controller
 
         $messages = $conversation->messages()
             ->with('user')
-            ->latest()
-            ->paginate(20);
+            ->oldest() // Changed from latest() to oldest()
+            ->paginate(10);
 
         $otherUser = $conversation->users()->where('user_id', '!=', Auth::id())->first();
+
+        if (request()->has('_ajax')) {
+            $html = view('theme.conversations.partials.conversationContent', compact('conversation', 'messages', 'otherUser'))->render();
+            return response()->json(['html' => $html]);
+        }
 
         return view('theme.conversations.show', compact('conversation', 'messages', 'otherUser'));
     }
 
+
+
+    public function create()
+    {
+        $userId = auth()->id();
+
+        // Get accepted invitations where no conversation exists yet
+        $invitations = auth()->user()->receivedInvitations()
+            ->with('sourceUser')
+            ->where('reply', 'قبول')
+            ->get()
+            ->filter(function ($invitation) use ($userId) {
+                return !DB::table('conversations')
+                    ->join('conversation_user as cu1', 'conversations.id', '=', 'cu1.conversation_id')
+                    ->join('conversation_user as cu2', 'conversations.id', '=', 'cu2.conversation_id')
+                    ->where('cu1.user_id', $userId)
+                    ->where('cu2.user_id', $invitation->source_user_id)
+                    ->exists();
+            });
+
+        return view('theme.conversations.create', ['invitations' => $invitations]);
+    }
+
     public function store(Request $request)
     {
-        try {
-            $request->validate([
-                'user_id' => 'required|exists:users,id|not_in:' . auth()->id(),
-                'message' => 'required|string|max:1000',
+        $request->validate([
+            'user_id' => 'required|exists:users,id|not_in:' . auth()->id(),
+            'message' => 'required|string|max:1000',
+        ]);
+
+        $targetUserId = $request->user_id;
+        $currentUserId = auth()->id();
+
+        // Check invitation acceptance if your app requires it
+        $acceptedInvitation = auth()->user()->receivedInvitations()
+            ->where('source_user_id', $targetUserId)
+            ->where('reply', 'قبول')
+            ->exists();
+
+        if (!$acceptedInvitation) {
+            return response()->json([
+                'success' => false,
+                'error' => 'يجب قبول الدعوة أولاً قبل بدء المحادثة'
+            ], 422);
+        }
+
+        // Check if conversation exists between users
+        $existing = auth()->user()->conversations()
+            ->whereHas('users', fn($q) => $q->where('user_id', $targetUserId))
+            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'success' => true,
+                'redirect' => route('conversations.show', $existing)
             ]);
+        }
 
-            $targetUserId = $request->user_id;
-            $currentUserId = auth()->id();
+        DB::beginTransaction();
 
-            // Check if invitation was accepted
-            $acceptedInvitation = auth()->user()->receivedInvitations()
-                ->where('source_user_id', $targetUserId)
-                ->where('reply', 'قبول')
-                ->exists();
-
-            if (!$acceptedInvitation) {
-                return response()->json([
-                    'success' => false,
-                    'error' => 'يجب قبول الدعوة أولاً قبل بدء المحادثة'
-                ], 422);
-            }
-
-            // Check for existing conversation
-            $existing = auth()->user()->conversations()
-                ->whereHas('users', fn($q) => $q->where('user_id', $targetUserId))
-                ->first();
-
-            if ($existing) {
-                return response()->json([
-                    'success' => true,
-                    'redirect' => route('conversations.show', $existing)
-                ]);
-            }
-
-            DB::beginTransaction();
-
-            // Create conversation
+        try {
             $conversation = Conversation::create([
                 'title' => 'New Conversation',
                 'last_message_at' => now()
             ]);
 
-            // Attach users with proper pivot data
+            // Attach users without 'body'
             $conversation->users()->attach([
-                $currentUserId => [
-                    'body' => $request->message,
-                    'is_active' => true,
-                    'read_at' => now(),
-                    'left_at' => null,
-                ],
-                $targetUserId => [
-                    'body' => null,
-                    'is_active' => true,
-                    'read_at' => null,
-                    'left_at' => null,
-                ],
+                $currentUserId => ['is_active' => true, 'read_at' => now()],
+                $targetUserId => ['is_active' => true, 'read_at' => null],
             ]);
 
-            // Create initial message
             $message = $conversation->messages()->create([
                 'user_id' => $currentUserId,
                 'body' => $request->message,
@@ -114,12 +130,15 @@ class ConversationController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'success' => false,
                 'error' => 'حدث خطأ أثناء إنشاء المحادثة: ' . $e->getMessage()
             ], 500);
         }
     }
+
+
 
     public function storeMessage(Request $request, Conversation $conversation)
     {
@@ -167,31 +186,11 @@ class ConversationController extends Controller
 
         Review::create([
             'sender_id' => auth()->id(),
-            'receved_id' => $otherUser->id,
-            'ratings' => $request->rating,
+            'received_id' => $otherUser->id,
+            'rating' => $request->rating,
             'comment' => $request->comment
         ]);
 
         return back()->with('success', 'تم إرسال التقييم بنجاح');
-    }
-
-    public function create()
-    {
-        $userId = auth()->id();
-
-        $invitations = auth()->user()->receivedInvitations()
-            ->with('sourceUser')
-            ->where('reply', 'قبول')
-            ->get()
-            ->filter(function ($invitation) use ($userId) {
-                return !DB::table('conversations')
-                    ->join('conversation_user as cu1', 'conversations.id', '=', 'cu1.conversation_id')
-                    ->join('conversation_user as cu2', 'conversations.id', '=', 'cu2.conversation_id')
-                    ->where('cu1.user_id', $userId)
-                    ->where('cu2.user_id', $invitation->source_user_id)
-                    ->exists();
-            });
-
-        return view('theme.conversations.create', ['invitations' => $invitations]);
     }
 }

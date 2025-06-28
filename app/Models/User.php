@@ -134,30 +134,28 @@ class User extends Authenticatable
     {
         return $this->hasMany(Review::class, 'receved_id');
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+
+    public function conversations()
+    {
+        return $this->belongsToMany(Conversation::class)
+            ->withPivot(['is_active', 'left_at', 'read_at', 'created_at', 'updated_at']);
+    }
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
+    }
+
+    public function hasConversationWith($userId)
+    {
+        return $this->conversations()
+            ->whereHas('users', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })
+            ->exists();
+    }
 }
-
-
-// /**
-    //  * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-    //  */
-
-    // public function conversations()
-    // {
-    //     return $this->belongsToMany(Conversation::class)
-    //         ->withPivot('is_active', 'left_at', 'body')
-    //         ->withTimestamps();
-    // }
-
-    // public function messages()
-    // {
-    //     return $this->hasMany(Message::class);
-    // }
-
-    // public function hasConversationWith($userId)
-    // {
-    //     return $this->conversations()
-    //         ->whereHas('users', function ($query) use ($userId) {
-    //             $query->where('user_id', $userId);
-    //         })
-    //         ->exists();
-    // }

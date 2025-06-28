@@ -1,32 +1,32 @@
 @extends('theme.master')
 
 @section('content')
-    <div class="container-fluid conversations-container">
-        <div class="row">
+    <div class="container-fluid conversations-container py-3">
+        <div class="row gx-4">
             <!-- Sidebar -->
             <div class="col-md-4 col-lg-3 sidebar">
-                <div class="card shadow-sm">
+                <div class="card shadow-sm h-100 d-flex flex-column">
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0">المحادثات</h5>
                     </div>
-                    <div class="card-body p-0">
+                    <div class="card-body p-0 overflow-auto flex-grow-1">
                         <div class="list-group list-group-flush">
                             @foreach (auth()->user()->conversations as $conv)
+                                @php
+                                    $otherUserSidebar = $conv->users->where('id', '!=', auth()->id())->first();
+                                @endphp
                                 <a href="{{ route('conversations.show', $conv) }}"
-                                    class="list-group-item list-group-item-action {{ $conv->id == $conversation->id ? 'active' : '' }}">
-                                    <div class="d-flex align-items-center">
-                                        @php
-                                            $otherUser = $conv->users->where('id', '!=', auth()->id())->first();
-                                        @endphp
-                                        <img src="{{ $otherUser->image_url }}" class="rounded-circle me-3" width="40"
-                                            height="40" alt="{{ $otherUser->fullName() }}">
-                                        <div>
-                                            <h6 class="mb-0">{{ $otherUser->fullName() }}</h6>
-                                            <small
-                                                class="{{ $conv->id == $conversation->id ? 'text-white' : 'text-muted' }}">
-                                                {{ $conv->messages->first()->body ?? 'لا توجد رسائل' }}
-                                            </small>
-                                        </div>
+                                    class="list-group-item list-group-item-action d-flex align-items-center
+                                    {{ $conv->id == $conversation->id ? 'active bg-primary text-white' : '' }}">
+                                    <img src="{{ $otherUserSidebar->image_url }}" class="rounded-circle me-3" width="45"
+                                        height="45" alt="{{ $otherUserSidebar->fullName() }}">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">{{ $otherUserSidebar->fullName() }}</h6>
+                                        <small
+                                            class="{{ $conv->id == $conversation->id ? 'text-white-50' : 'text-muted' }} text-truncate d-block"
+                                            style="max-width: 160px;">
+                                            {{ $conv->messages->first()?->body ?? 'لا توجد رسائل' }}
+                                        </small>
                                     </div>
                                 </a>
                             @endforeach
@@ -36,48 +36,47 @@
             </div>
 
             <!-- Main Content -->
-            <div class="col-md-8 col-lg-9 main-content">
-                <div class="card shadow-sm h-100">
+            <div class="col-md-8 col-lg-9 main-content d-flex flex-column">
+                <div class="card shadow-sm flex-grow-1 d-flex flex-column">
                     <!-- Conversation Header -->
                     <div class="card-header bg-light d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center">
-                            <img src="{{ $otherUser->image_url }}" class="rounded-circle me-3" width="40" height="40"
+                            <img src="{{ $otherUser->image_url }}" class="rounded-circle me-3" width="50" height="50"
                                 alt="{{ $otherUser->fullName() }}">
                             <h5 class="mb-0">{{ $otherUser->fullName() }}</h5>
                         </div>
-                        <div>
-                            <button class="btn btn-sm btn-outline-danger leave-conversation"
-                                data-url="{{ route('conversations.leave', $conversation) }}">
-                                مغادرة المحادثة
-                            </button>
-                        </div>
+                        {{-- <button class="btn btn-outline-danger btn-sm leave-conversation"
+                            data-url="{{ route('conversations.leave', $conversation) }}">
+                            مغادرة المحادثة
+                        </button> --}}
                     </div>
 
                     <!-- Messages -->
-                    <div class="card-body messages-container">
-                        <div class="messages" id="messages">
-                            @foreach ($messages as $message)
-                                <div class="message {{ $message->user_id == auth()->id() ? 'sent' : 'received' }}">
-                                    <div class="message-content">
-                                        <p>{{ $message->body }}</p>
-                                        <small class="text-muted">
-                                            {{ $message->created_at->diffForHumans() }}
-                                        </small>
-                                    </div>
+                    <div class="card-body messages-container flex-grow-1 overflow-auto bg-white px-3 py-2" id="messages">
+                        @foreach ($messages as $message)
+                            <div
+                                class="message d-flex {{ $message->user_id == auth()->id() ? 'justify-content-end' : 'justify-content-start' }} mb-2">
+                                <div class="message-content p-3 rounded shadow
+                                    {{ $message->user_id == auth()->id() ? 'bg-primary text-white' : 'bg-light text-dark' }}"
+                                    style="max-width: 75%; word-wrap: break-word;">
+                                    <p class="mb-1">{{ $message->body }}</p>
+                                    <small class="text-muted fst-italic" style="font-size: 0.75rem;">
+                                        {{ $message->created_at->diffForHumans() }}
+                                    </small>
                                 </div>
-                            @endforeach
-                        </div>
+                            </div>
+                        @endforeach
                     </div>
 
                     <!-- Message Form -->
                     <div class="card-footer bg-light">
-                        <form action="{{ route('conversations.messages.store', $conversation) }}" method="POST"
-                            class="message-form">
+                        <form id="messageForm" action="{{ route('conversations.messages.store', $conversation) }}"
+                            method="POST" autocomplete="off">
                             @csrf
                             <div class="input-group">
-                                <input type="text" name="body" class="form-control" placeholder="اكتب رسالة..."
-                                    required>
-                                <button class="btn btn-primary" type="submit">إرسال</button>
+                                <input type="text" name="body" id="messageInput" class="form-control"
+                                    placeholder="اكتب رسالة..." required autocomplete="off">
+                                <button class="btn btn-primary" type="submit" id="sendBtn">إرسال</button>
                             </div>
                         </form>
                     </div>
@@ -124,47 +123,54 @@
 
 @push('styles')
     <style>
-        .conversations-container {
-            height: calc(100vh - 150px);
+        html,
+        body {
+            height: 100%;
+            background-color: #f8f9fa;
         }
 
-        .sidebar,
+        .conversations-container {
+            height: calc(100vh - 100px);
+        }
+
+        .sidebar {
+            height: 100%;
+            border-radius: 0.5rem;
+        }
+
         .main-content {
             height: 100%;
         }
 
         .messages-container {
+            background-color: #fff;
+            height: 100%;
             overflow-y: auto;
-            height: calc(100% - 120px);
+            padding-right: 0.5rem;
         }
 
-        .messages {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .message-content {
+            font-size: 0.95rem;
+            line-height: 1.3;
+            word-break: break-word;
+            position: relative;
         }
 
-        .message {
-            max-width: 70%;
-            padding: 10px 15px;
-            border-radius: 15px;
+        .message.sent .message-content {
+            background-color: #0d6efd;
+            color: #fff;
         }
 
-        .message.sent {
-            align-self: flex-end;
-            background-color: #007bff;
-            color: white;
-        }
-
-        .message.received {
-            align-self: flex-start;
-            background-color: #f1f1f1;
+        .message.received .message-content {
+            background-color: #e9ecef;
+            color: #212529;
         }
 
         .rating {
             display: flex;
             flex-direction: row-reverse;
             justify-content: flex-end;
+            gap: 0.25rem;
         }
 
         .rating input {
@@ -175,15 +181,34 @@
             font-size: 2rem;
             color: #ddd;
             cursor: pointer;
+            transition: color 0.3s ease;
+            user-select: none;
         }
 
-        .rating input:checked~label {
-            color: #ffc107;
-        }
-
+        .rating input:checked~label,
         .rating label:hover,
         .rating label:hover~label {
             color: #ffc107;
+        }
+
+        /* Scrollbar styling */
+        .messages-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+        }
+
+        .messages-container::-webkit-scrollbar-track {
+            background-color: transparent;
+        }
+
+        /* Sidebar active conversation styling */
+        .list-group-item.active {
+            font-weight: 600;
+            border-color: #0d6efd;
         }
     </style>
 @endpush
@@ -191,51 +216,128 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            // Auto-scroll to bottom of messages
             const messagesContainer = $('#messages');
-            messagesContainer.scrollTop(messagesContainer[0].scrollHeight);
+            const messageForm = $('#messageForm');
+            const messageInput = $('#messageInput');
+            const sendBtn = $('#sendBtn');
 
-            // Handle leave conversation
-            $('.leave-conversation').click(function() {
-                const url = $(this).data('url');
+            // Scroll to bottom on initial load
+            scrollToBottom();
 
-                Swal.fire({
-                    title: 'هل أنت متأكد؟',
-                    text: 'سيتم مغادرة هذه المحادثة ولن تتمكن من إرسال رسائل جديدة',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'نعم، مغادرة',
-                    cancelButtonText: 'إلغاء',
-                    confirmButtonColor: '#dc3545',
-                    reverseButtons: true
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: url,
-                            method: 'POST',
-                            data: {
-                                _token: '{{ csrf_token() }}'
-                            },
-                            success: function() {
-                                window.location.href =
-                                    '{{ route('conversations.index') }}';
-                            }
+            // AJAX message sending
+            messageForm.on('submit', function(e) {
+                e.preventDefault();
+
+                const message = messageInput.val().trim();
+                if (!message) return;
+
+                sendBtn.prop('disabled', true);
+
+                $.ajax({
+                    url: messageForm.attr('action'),
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        body: message,
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            // Create and append new message
+                            const newMessage = createMessageElement(response.message, true);
+                            messagesContainer.append(newMessage);
+                            scrollToBottom();
+                            messageInput.val('');
+
+                            // Optionally: Update the sidebar preview
+                            updateSidebarPreview(response.message.conversation_id, message);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Error:', xhr.responseText);
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Failed to send message. Please try again.',
+                            icon: 'error'
                         });
+                    },
+                    complete: function() {
+                        sendBtn.prop('disabled', false);
                     }
                 });
             });
 
-            // Show review modal when leaving conversation
-            $('#leaveConversation').click(function() {
-                $('#reviewModal').modal('show');
-            });
+            // Function to scroll to bottom
+            function scrollToBottom() {
+                messagesContainer.scrollTop(messagesContainer[0].scrollHeight);
+            }
 
-            // Real-time messaging with Pusher (example)
-            // You'll need to implement this based on your real-time solution
-            // Echo.private(`conversation.${conversationId}`)
-            //     .listen('MessageSent', (e) => {
-            //         // Append new message to the chat
-            //     });
+            // Function to create message HTML element
+            function createMessageElement(message, isSent) {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                return `
+                <div class="message d-flex ${isSent ? 'justify-content-end' : 'justify-content-start'} mb-2">
+                    <div class="message-content p-3 rounded shadow 
+                        ${isSent ? 'bg-primary text-white' : 'bg-light text-dark'}" 
+                        style="max-width: 75%; word-wrap: break-word;">
+                        <p class="mb-1">${escapeHtml(message.body)}</p>
+                        <small class="${isSent ? 'text-white-50' : 'text-muted'} fst-italic" style="font-size: 0.75rem;">
+                            ${timeString}
+                        </small>
+                    </div>
+                </div>
+            `;
+            }
+
+            // Function to update sidebar preview
+            function updateSidebarPreview(conversationId, messageText) {
+                $(`a[href*="/conversations/${conversationId}"] small`).text(messageText);
+            }
+
+            // Escape HTML utility function
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // Load more messages when scrolling to top
+            let loading = false;
+            messagesContainer.on('scroll', function() {
+                if (messagesContainer.scrollTop() === 0 && !loading) {
+                    loading = true;
+                    const firstMessage = $('.message').first();
+                    const firstMessageId = firstMessage.data('id');
+
+                    $.ajax({
+                        url: '{{ route('conversations.show', $conversation) }}',
+                        data: {
+                            before: firstMessageId,
+                            _ajax: true
+                        },
+                        success: function(response) {
+                            if (response.html) {
+                                const scrollPosition = messagesContainer.scrollTop();
+                                const scrollHeight = messagesContainer[0].scrollHeight;
+
+                                $(response.html).insertBefore(firstMessage);
+
+                                // Maintain scroll position
+                                messagesContainer.scrollTop(messagesContainer[0].scrollHeight -
+                                    scrollHeight + scrollPosition);
+                            }
+                        },
+                        complete: function() {
+                            loading = false;
+                        }
+                    });
+                }
+            });
         });
     </script>
 @endpush

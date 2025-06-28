@@ -56,6 +56,81 @@
 @endpush
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.conversation-form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault(); // 🚨 Critical: prevent full POST
+
+                    const submitBtn = form.querySelector('.send-message-btn');
+                    const spinner = submitBtn.querySelector('.spinner-border');
+                    const btnText = submitBtn.querySelector('.btn-text');
+                    const errorMessage = form.querySelector('.error-message');
+
+                    // Reset UI
+                    errorMessage.classList.add('d-none');
+                    errorMessage.textContent = '';
+                    submitBtn.disabled = true;
+                    btnText.textContent = 'جاري الإرسال...';
+                    spinner.classList.remove('d-none');
+
+                    fetch(form.action, {
+                            method: 'POST',
+                            body: new FormData(form),
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value
+                            }
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.json().then(err => {
+                                    throw new Error(err.error ||
+                                        'حدث خطأ أثناء الإرسال');
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success && data.redirect) {
+                                Swal.fire({
+                                    title: 'تم إرسال الرسالة!',
+                                    text: 'سيتم تحويلك إلى المحادثة الآن.',
+                                    icon: 'success',
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                });
+
+                                setTimeout(() => {
+                                    window.location.href = data.redirect;
+                                }, 2000);
+                            } else if (data.error) {
+                                throw new Error(data.error);
+                            }
+                        })
+                        .catch(error => {
+                            console.error(error);
+                            errorMessage.textContent = error.message;
+                            errorMessage.classList.remove('d-none');
+                        })
+                        .finally(() => {
+                            submitBtn.disabled = false;
+                            btnText.textContent = 'إرسال';
+                            spinner.classList.add('d-none');
+                        });
+                });
+            });
+        });
+    </script>
+@endpush
+
+
+
+
+{{-- @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const forms = document.querySelectorAll('.conversation-form');
@@ -87,15 +162,26 @@
                         .then(response => {
                             if (!response.ok) {
                                 return response.json().then(err => {
-                                    throw new Error(err.error ||
-                                        'Network response was not ok');
+                                    throw new Error(err.error || 'خطأ في الاستجابة');
                                 });
                             }
                             return response.json();
                         })
                         .then(data => {
                             if (data.success && data.redirect) {
-                                window.location.href = data.redirect;
+                                Swal.fire({
+                                    title: 'تم الإرسال!',
+                                    text: 'تم بدء المحادثة بنجاح',
+                                    icon: 'success',
+                                    confirmButtonText: 'حسناً',
+                                    timer: 2000,
+                                    timerProgressBar: true,
+                                    showConfirmButton: false
+                                });
+
+                                setTimeout(() => {
+                                    window.location.href = data.redirect;
+                                }, 2000);
                             } else if (data.error) {
                                 throw new Error(data.error);
                             }
@@ -114,4 +200,4 @@
             });
         });
     </script>
-@endpush
+@endpush --}}
