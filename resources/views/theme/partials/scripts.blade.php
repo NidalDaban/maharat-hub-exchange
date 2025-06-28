@@ -71,32 +71,25 @@
 {{-- Invitation Script --}}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Invitation script loaded');
 
         const invitationButtons = document.querySelectorAll('.send-invitation-btn');
         if (!invitationButtons.length) return;
 
-        // Handle invitation button clicks
         $(document).on('click', '.send-invitation-btn', function(e) {
             e.preventDefault();
             const form = $(this).closest('form');
             const userName = form.data('user-name') || 'هذا المستخدم';
             const btn = $(this);
 
-            // Force correct form action
             form.attr('action', '{{ route('invitations.send') }}');
-            console.log('Form action set to:', form.attr('action'));
 
-            // Show loading state
             btn.prop('disabled', true).html(`
                 <span class="spinner-border spinner-border-sm" role="status"></span>
                 جاري التحقق...
             `);
 
-            // Check eligibility first
             checkInvitationEligibility()
                 .then(response => {
-                    console.log('Eligibility check response:', response);
                     btn.prop('disabled', false).text('دعوة');
 
                     if (response.status === 'unauthenticated') {
@@ -104,7 +97,6 @@
                     } else if (response.status === 'incomplete') {
                         showProfileIncompleteWarning(response.completion_percentage);
                     } else {
-                        // Show confirmation dialog
                         Swal.fire({
                             title: 'إرسال دعوة',
                             html: `هل تريد إرسال دعوة إلى <strong>${userName}</strong>؟`,
@@ -117,7 +109,6 @@
                             reverseButtons: true
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                console.log('Sending invitation to:', userName);
                                 sendInvitation(form);
                             }
                         });
@@ -130,7 +121,6 @@
                 });
         });
 
-        // Check eligibility function
         function checkInvitationEligibility() {
             return new Promise((resolve, reject) => {
                 $.ajax({
@@ -151,7 +141,6 @@
             });
         }
 
-        // Show error message
         function showError(message) {
             Swal.fire({
                 title: 'خطأ',
@@ -162,7 +151,6 @@
             });
         }
 
-        // Show profile incomplete warning
         function showProfileIncompleteWarning(percentage) {
             Swal.fire({
                 title: 'ملف غير مكتمل',
@@ -174,7 +162,6 @@
             });
         }
 
-        // Send invitation request
         function sendInvitation(form) {
             const btn = form.find('button');
             btn.prop('disabled', true).html(`
@@ -221,13 +208,10 @@
 {{-- Invitation Reply Script --}}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Invitation reply script loaded');
 
-        // Only proceed if reply buttons exist
         const replyButtons = document.querySelectorAll('.reply-btn');
         if (!replyButtons.length) return;
 
-        // Handle reply button clicks
         $(document).on('click', '.reply-btn', function() {
             const button = $(this);
             const url = button.data('url');
@@ -250,7 +234,6 @@
             });
         });
 
-        // Function to send the reply
         function sendReply(url, reply, button) {
             const originalText = button.text();
             button.prop('disabled', true).html(`
@@ -329,20 +312,17 @@
 </script>
 
 {{-- Skills filtrations --}}
-<script>
+{{-- <script>
     document.addEventListener('DOMContentLoaded', function() {
         const filterForm = document.getElementById('filterForm');
         const usersContainer = document.getElementById('users-container');
 
-        // Exit if required elements don't exist
         if (!filterForm || !usersContainer) return;
 
-        // Function to handle form submission
         function submitForm() {
             const formData = new FormData(filterForm);
             const url = new URL(window.location.href);
 
-            // Show loading indicator
             usersContainer.innerHTML =
                 '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>';
 
@@ -363,13 +343,11 @@
                     initializeInvitationForms();
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     usersContainer.innerHTML =
                         '<div class="col-12 text-center py-5"><h4>حدث خطأ أثناء جلب البيانات</h4></div>';
                 });
         }
 
-        // Handle form changes - with null check
         const filterInputs = filterForm.querySelectorAll(
             'input[type="checkbox"], select[name="sort"], input[name="search"]');
         if (filterInputs.length) {
@@ -378,7 +356,6 @@
             });
         }
 
-        // Handle search input with debounce - with null check
         const searchInput = filterForm.querySelector('input[name="search"]');
         if (searchInput) {
             let searchTimeout;
@@ -388,7 +365,6 @@
             });
         }
 
-        // Handle pagination clicks - with container check
         document.addEventListener('click', function(e) {
             const paginationLink = e.target.closest('.pagination a');
             if (!paginationLink) return;
@@ -423,7 +399,6 @@
                 });
         });
 
-        // Function to reinitialize invitation forms - with null check
         function initializeInvitationForms() {
             const invitationForms = document.querySelectorAll('.invitation-form');
             if (!invitationForms.length) return;
@@ -473,23 +448,36 @@
             });
         }
     });
+</script> --}}
+
+{{-- Hero Search Script --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const heroSearchForm = document.getElementById('heroSearchForm');
+
+        if (heroSearchForm) {
+            heroSearchForm.addEventListener('submit', function(e) {
+                // The default form submission will handle the navigation
+                // No need for additional JavaScript unless you want AJAX
+            });
+
+            const searchInput = heroSearchForm.querySelector('input[name="search"]');
+            if (searchInput) {
+            }
+        }
+    });
 </script>
 
-
-{{-- Skills Pagination + Invitation Init --}}
 <script>
-    // Only run this code if we're on a page that needs it
     if (document.querySelector('.invite-btn') || document.getElementById('users-container')) {
         document.addEventListener('DOMContentLoaded', function() {
 
-            // Only proceed if users container exists
             const usersContainer = document.getElementById('users-container');
             if (!usersContainer) return;
 
-            // Global invitation initialization function
             function initializeInvitationForms() {
                 const inviteButtons = document.querySelectorAll('.invite-btn');
-                if (!inviteButtons.length) return; // Exit if no buttons found
+                if (!inviteButtons.length) return;
 
                 inviteButtons.forEach(btn => {
                     btn.removeEventListener('click', handleInviteClick);
@@ -497,13 +485,10 @@
                 });
             }
 
-            // Actual event handler
             function handleInviteClick(e) {
                 e.preventDefault();
                 const userId = e.currentTarget.getAttribute('data-user-id');
-                console.log('Invitation clicked for user:', userId);
 
-                // Replace with your actual invitation logic
                 Swal.fire({
                     title: 'إرسال دعوة',
                     text: `هل تريد دعوة المستخدم ${userId}؟`,
@@ -514,16 +499,14 @@
                 });
             }
 
-            // Initialize on page load
             initializeInvitationForms();
 
-            // Handle AJAX pagination
             document.addEventListener('click', function(e) {
                 const link = e.target.closest('.pagination a');
                 if (!link) return;
 
                 const usersContainer = document.getElementById('users-container');
-                if (!usersContainer) return; // Exit if container doesn't exist
+                if (!usersContainer) return;
 
                 e.preventDefault();
                 const url = link.getAttribute('href');
@@ -559,17 +542,16 @@
 </script>
 
 
-{{-- One-Single Notification --}}
 <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async></script>
 <script>
     window.OneSignal = window.OneSignal || [];
     OneSignal.push(function() {
         OneSignal.init({
-            appId: '{{ config('services.onesignal.app_id') }}', // Use your OneSignal App ID here
+            appId: '{{ config('services.onesignal.app_id') }}',
             notifyButton: {
                 enable: true
             },
-            allowLocalhostAsSecureOrigin: true // For local dev with http
+            allowLocalhostAsSecureOrigin: true
         });
 
         @auth
@@ -611,191 +593,6 @@
 
     @auth
     updateInvitationCount();
-    setInterval(updateInvitationCount, 15000); // refresh every 15 seconds
+    setInterval(updateInvitationCount, 15000);
     @endauth
 </script>
-
-
-
-{{-- <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
-<script>
-    window.OneSignal = window.OneSignal || [];
-    OneSignal.push(function() {
-        OneSignal.init({
-            appId: '{{ config('services.onesignal.app_id') }}', // ✅ FIXED: proper JS string
-            notifyButton: {
-                enable: true
-            },
-            allowLocalhostAsSecureOrigin: true
-        });
-
-        @auth
-        OneSignal.on('subscriptionChange', function(isSubscribed) {
-            if (isSubscribed) {
-                OneSignal.getUserId(function(playerId) {
-                    fetch("{{ route('onesignal.update') }}", {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({
-                            player_id: playerId
-                        })
-                    });
-                });
-            }
-        });
-    @endauth
-    });
-</script>
-<script>
-    function updateInvitationCount() {
-        fetch('{{ url('/invitations/count') }}')
-            .then(res => res.json())
-            .then(data => {
-                const badge = document.getElementById('invitation-count');
-                if (data.count > 0) {
-                    badge.textContent = data.count;
-                    badge.style.display = 'inline-block';
-                } else {
-                    badge.style.display = 'none';
-                }
-            });
-    }
-
-    @auth
-    updateInvitationCount();
-    setInterval(updateInvitationCount, 15000); // Check every 15s
-    @endauth
-</script> --}}
-
-
-
-
-
-
-{{-- Skills Pagination + Invitation Init --}}
-{{-- <script>
-    // Global invitation initialization function
-    function initializeInvitationForms() {
-        // Remove old listeners to prevent duplication
-        document.querySelectorAll('.invite-btn').forEach(btn => {
-            btn.removeEventListener('click', handleInviteClick); // detach if already exists
-            btn.addEventListener('click', handleInviteClick); // attach fresh
-        });
-    }
-
-    // Define the actual event handler
-    function handleInviteClick(e) {
-        const userId = e.currentTarget.getAttribute('data-user-id');
-        console.log('Invitation clicked for user:', userId);
-
-        // You can replace this with actual logic (e.g., show modal, send AJAX)
-        alert('دعوة المستخدم رقم: ' + userId);
-    }
-
-    // Run once on initial page load
-    document.addEventListener('DOMContentLoaded', function() {
-        initializeInvitationForms();
-    });
-
-    // Handle AJAX pagination
-    document.addEventListener('click', function(e) {
-        const link = e.target.closest('.pagination a');
-        if (link) {
-            e.preventDefault();
-            const url = link.getAttribute('href');
-
-            document.getElementById('users-container').innerHTML =
-                '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">جار التحميل...</span></div></div>';
-
-            fetch(url, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('users-container').innerHTML = data.html;
-                    document.getElementById('pagination-links').innerHTML = data.pagination;
-
-                    // Reinitialize functionality on new elements
-                    initializeInvitationForms();
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.getElementById('users-container').innerHTML =
-                        '<div class="col-12 text-center py-5"><h4>حدث خطأ أثناء جلب البيانات</h4></div>';
-                });
-        }
-    });
-</script> --}}
-
-{{-- contact us --}}
-{{-- <script>
-    $(document).ready(function() {
-        $('form').on('submit', function(e) {
-            e.preventDefault();
-            const form = $(this);
-            const submitBtn = form.find('button[type="submit"]');
-
-            // Show loading state
-            submitBtn.prop('disabled', true).html(`
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                جاري الإرسال...
-            `);
-
-            $.ajax({
-                url: form.attr('action'),
-                method: form.attr('method'),
-                data: form.serialize(),
-                success: function(response) {
-                    submitBtn.prop('disabled', false).text('إرسال');
-
-                    if (response.success) {
-                        form[0].reset(); // Clear the form
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'تم الإرسال',
-                            text: response.message,
-                            confirmButtonText: 'حسنًا'
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'info',
-                            title: 'تنبيه',
-                            text: 'This is for test',
-                            confirmButtonText: 'موافق'
-                        });
-                    }
-                },
-                error: function(xhr) {
-                    submitBtn.prop('disabled', false).text('إرسال');
-
-                    if (xhr.status === 422) {
-                        const errors = xhr.responseJSON.errors;
-                        let errorText = '';
-                        for (let field in errors) {
-                            errorText += `${errors[field].join(' ')}\n`;
-                        }
-
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'خطأ في التحقق',
-                            text: errorText,
-                            confirmButtonText: 'موافق'
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'خطأ',
-                            text: 'حدث خطأ أثناء إرسال النموذج. يرجى المحاولة مرة أخرى.',
-                            confirmButtonText: 'موافق'
-                        });
-                    }
-                }
-            });
-        });
-    });
-</script> --}}

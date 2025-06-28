@@ -61,14 +61,13 @@
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.conversation-form').forEach(form => {
                 form.addEventListener('submit', function(e) {
-                    e.preventDefault(); // 🚨 Critical: prevent full POST
+                    e.preventDefault();
 
                     const submitBtn = form.querySelector('.send-message-btn');
                     const spinner = submitBtn.querySelector('.spinner-border');
                     const btnText = submitBtn.querySelector('.btn-text');
                     const errorMessage = form.querySelector('.error-message');
 
-                    // Reset UI
                     errorMessage.classList.add('d-none');
                     errorMessage.textContent = '';
                     submitBtn.disabled = true;
@@ -124,80 +123,3 @@
         });
     </script>
 @endpush
-
-
-
-
-{{-- @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const forms = document.querySelectorAll('.conversation-form');
-
-            forms.forEach(form => {
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-
-                    const submitBtn = form.querySelector('.send-message-btn');
-                    const spinner = submitBtn.querySelector('.spinner-border');
-                    const btnText = submitBtn.querySelector('.btn-text');
-                    const errorMessage = form.querySelector('.error-message');
-
-                    // Reset UI
-                    errorMessage.classList.add('d-none');
-                    errorMessage.textContent = '';
-                    submitBtn.disabled = true;
-                    btnText.textContent = 'جاري الإرسال...';
-                    spinner.classList.remove('d-none');
-
-                    fetch(form.action, {
-                            method: 'POST',
-                            body: new FormData(form),
-                            headers: {
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value
-                            }
-                        })
-                        .then(response => {
-                            if (!response.ok) {
-                                return response.json().then(err => {
-                                    throw new Error(err.error || 'خطأ في الاستجابة');
-                                });
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            if (data.success && data.redirect) {
-                                Swal.fire({
-                                    title: 'تم الإرسال!',
-                                    text: 'تم بدء المحادثة بنجاح',
-                                    icon: 'success',
-                                    confirmButtonText: 'حسناً',
-                                    timer: 2000,
-                                    timerProgressBar: true,
-                                    showConfirmButton: false
-                                });
-
-                                setTimeout(() => {
-                                    window.location.href = data.redirect;
-                                }, 2000);
-                            } else if (data.error) {
-                                throw new Error(data.error);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            errorMessage.textContent = error.message;
-                            errorMessage.classList.remove('d-none');
-                        })
-                        .finally(() => {
-                            submitBtn.disabled = false;
-                            btnText.textContent = 'إرسال';
-                            spinner.classList.add('d-none');
-                        });
-                });
-            });
-        });
-    </script>
-@endpush --}}

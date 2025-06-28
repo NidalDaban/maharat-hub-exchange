@@ -19,7 +19,6 @@ class ThemeController extends Controller
     {
         $query = User::with(['skills', 'country', 'languages']);
 
-        // Search by skill name
         if ($request->has('search') && !empty($request->search)) {
             $searchTerm = $request->search;
             $query->whereHas('skills', function ($q) use ($searchTerm) {
@@ -27,36 +26,31 @@ class ThemeController extends Controller
             });
         }
 
-        // Filter by gender
         if ($request->has('gender') && !empty($request->gender)) {
             $query->whereIn('gender', $request->gender);
         }
 
-        // Filter by country
         if ($request->has('countries') && !empty($request->countries)) {
             $query->whereIn('country_id', $request->countries);
         }
 
-        // Filter by classification (through skills)
         if ($request->has('classifications') && !empty($request->classifications)) {
             $query->whereHas('skills', function ($q) use ($request) {
                 $q->whereIn('classification_id', $request->classifications);
             });
         }
 
-        // Sorting
         if ($request->has('sort')) {
             switch ($request->sort) {
                 case 'newest':
                     $query->orderBy('created_at', 'desc');
                     break;
                 case 'top_rated':
-                    // You'll need to implement your rating logic here
-                    // $query->orderBy('rating', 'desc');
+                    
                     break;
                 case 'relevant':
                 default:
-                    // Default sorting
+                    
                     break;
             }
         }

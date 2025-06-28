@@ -32,8 +32,8 @@ class ConversationController extends Controller
 
         $messages = $conversation->messages()
             ->with('user')
-            ->oldest() // Changed from latest() to oldest()
-            ->paginate(10);
+            ->oldest()
+            ->paginate(1000);
 
         $otherUser = $conversation->users()->where('user_id', '!=', Auth::id())->first();
 
@@ -45,13 +45,10 @@ class ConversationController extends Controller
         return view('theme.conversations.show', compact('conversation', 'messages', 'otherUser'));
     }
 
-
-
     public function create()
     {
         $userId = auth()->id();
 
-        // Get accepted invitations where no conversation exists yet
         $invitations = auth()->user()->receivedInvitations()
             ->with('sourceUser')
             ->where('reply', 'قبول')
@@ -78,7 +75,6 @@ class ConversationController extends Controller
         $targetUserId = $request->user_id;
         $currentUserId = auth()->id();
 
-        // Check invitation acceptance if your app requires it
         $acceptedInvitation = auth()->user()->receivedInvitations()
             ->where('source_user_id', $targetUserId)
             ->where('reply', 'قبول')
@@ -91,7 +87,6 @@ class ConversationController extends Controller
             ], 422);
         }
 
-        // Check if conversation exists between users
         $existing = auth()->user()->conversations()
             ->whereHas('users', fn($q) => $q->where('user_id', $targetUserId))
             ->first();
@@ -111,7 +106,6 @@ class ConversationController extends Controller
                 'last_message_at' => now()
             ]);
 
-            // Attach users without 'body'
             $conversation->users()->attach([
                 $currentUserId => ['is_active' => true, 'read_at' => now()],
                 $targetUserId => ['is_active' => true, 'read_at' => null],
@@ -137,8 +131,6 @@ class ConversationController extends Controller
             ], 500);
         }
     }
-
-
 
     public function storeMessage(Request $request, Conversation $conversation)
     {

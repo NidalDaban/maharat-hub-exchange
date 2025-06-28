@@ -71,14 +71,12 @@ class ProfileController extends Controller
 
         $user->save();
 
-        // Handle skills - ensure we only sync positive integers
         $skillsData = json_decode($request->input('skills_data'), true) ?? [];
         $validSkills = array_filter($skillsData, function ($id) {
             return is_numeric($id) && $id > 0;
         });
         $user->skills()->sync($validSkills);
 
-        // Handle languages - validate structure before syncing
         $languagesData = json_decode($request->input('languages_data'), true) ?? [];
         $languagesSyncData = [];
 

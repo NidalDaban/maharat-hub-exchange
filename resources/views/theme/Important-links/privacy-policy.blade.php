@@ -5,9 +5,11 @@
 
 <body>
     <!-- ======= Header ======= -->
-    @include('theme.Important-links.partials.header',
-    ['title' => 'سياسة الخصوصية لمهارات هب'],
-    ['description' => 'كل ما يجب ان تعرفه للاشتراك و التعاون معنا'])
+    @include(
+        'theme.Important-links.partials.header',
+        ['title' => 'سياسة الخصوصية لمهارات هب'],
+        ['description' => 'كل ما يجب ان تعرفه للاشتراك و التعاون معنا']
+    )
 
     <!-- ======= Privacy Content ======= -->
     <main class="privacy-content">
@@ -33,7 +35,7 @@
                     </div>
 
                     <!-- Table of Contents -->
-                    {{-- <div class="toc-container">
+                    <div class="toc-container">
                         <h3 class="toc-title">فهرس المحتويات</h3>
                         <ul class="toc-list">
                             <li><a href="#policy">سياسة الخصوصية</a></li>
@@ -61,7 +63,7 @@
                             <li><a href="#your-rights">10. حقوقك</a></li>
                             <li><a href="#data-requirement">11. وجوب أو إلزامية تقديم البيانات</a></li>
                         </ul>
-                    </div> --}}
+                    </div>
 
                     <!-- Main Content -->
                     <div class="privacy-section" id="policy">

@@ -294,19 +294,16 @@
             `;
             }
 
-            // Function to update sidebar preview
             function updateSidebarPreview(conversationId, messageText) {
                 $(`a[href*="/conversations/${conversationId}"] small`).text(messageText);
             }
 
-            // Escape HTML utility function
             function escapeHtml(text) {
                 const div = document.createElement('div');
                 div.textContent = text;
                 return div.innerHTML;
             }
 
-            // Load more messages when scrolling to top
             let loading = false;
             messagesContainer.on('scroll', function() {
                 if (messagesContainer.scrollTop() === 0 && !loading) {
@@ -327,7 +324,6 @@
 
                                 $(response.html).insertBefore(firstMessage);
 
-                                // Maintain scroll position
                                 messagesContainer.scrollTop(messagesContainer[0].scrollHeight -
                                     scrollHeight + scrollPosition);
                             }

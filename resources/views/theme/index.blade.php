@@ -15,13 +15,7 @@
 
 
             <!-- Updated Search Section -->
-            <div class="search-container" data-aos="fade-up" data-aos-delay="300">
-                <!-- Tabs -->
-                {{-- <div class="tabs mb-4">
-                    <button class="tab-button active">ابحث عن مهارة</button>
-                </div> --}}
-
-                <!-- Search Bar & Filters -->
+            {{-- <div class="search-container" data-aos="fade-up" data-aos-delay="300">
                 <div class="search-wrapper">
                     <div class="search-bar">
                         <div class="search-input">
@@ -30,8 +24,23 @@
                                 <i class="bi bi-search"></i> بحث
                             </button>
                         </div>
+                    </div>                    
+                </div>
+            </div> --}}
+
+            <!-- Updated Search Section -->
+            <div class="search-container" data-aos="fade-up" data-aos-delay="300">
+                <div class="search-wrapper">
+                    <div class="search-bar">
+                        <form action="{{ route('theme.skills') }}" method="GET" id="heroSearchForm" style="width: 100%">
+                            <div class="search-input" style="width: 100%">
+                                <input type="text" name="search" placeholder="ابحث عن المهارة">
+                                <button type="submit" class="search-button">
+                                    <i class="bi bi-search"></i> بحث
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                    
                 </div>
             </div>
 

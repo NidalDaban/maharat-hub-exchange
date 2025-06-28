@@ -8,20 +8,6 @@
                 <div class="dropdown">
                     <a href="#" class="d-flex flex-column align-items-center text-decoration-none dropdown-toggle"
                         id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
-                        {{-- <img src="{{ auth()->user()->image_url }}" alt="صورة المستخدم" width="48" height="48"
-                            class="rounded-circle mb-1"> --}}
-
-                        {{-- <div class="position-relative">
-                            <img src="{{ auth()->user()->image_url }}" alt="صورة المستخدم" width="48" height="48"
-                            class="rounded-circle mb-1">
-                            
-                            <span id="invitation-count"
-                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                                style="font-size: 0.6rem; display: none;">
-                                0
-                            </span>
-                            <i class="fas fa-bell fa-lg text-dark"></i>
-                        </div> --}}
 
                         <div class="d-flex align-items-center position-relative">
                             <img src="{{ auth()->user()->image_url }}" alt="صورة المستخدم" width="48" height="48"
@@ -69,8 +55,6 @@
             @endauth
         </div>
 
-        <!-- Rest of your header code remains the same -->
-        <!-- Logo (middle element) -->
         <a href="{{ route('theme.index') }}" class="logo d-flex align-items-center order-2 mx-auto">
             <img src="https://d1csarkz8obe9u.cloudfront.net/posterpreviews/skill-logo-design-template-6677debd608907e81c75e20c66e95baf_screen.jpg?ts=1685817469"
                 alt="">

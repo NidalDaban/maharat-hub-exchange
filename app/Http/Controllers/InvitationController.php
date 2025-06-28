@@ -28,12 +28,10 @@ class InvitationController extends Controller
         $user = $request->user();
         $destinationId = $request->destination_user_id;
 
-        // Prevent self-invitation
         if ($user->id == $destinationId) {
             return response()->json(['message' => 'لا يمكنك دعوة نفسك.'], 422);
         }
 
-        // Check for existing invitations
         $existingInvitation = Invitation::where(function ($query) use ($user, $destinationId) {
             $query->where('source_user_id', $user->id)
                 ->where('destination_user_id', $destinationId);
@@ -100,7 +98,7 @@ class InvitationController extends Controller
                 'status' => 'incomplete',
                 'completion_percentage' => $completion,
                 'message' => 'يجب إكمال ملفك الشخصي'
-            ], 200); // Changed to 200 to handle gracefully
+            ], 200);
         }
 
         return response()->json([

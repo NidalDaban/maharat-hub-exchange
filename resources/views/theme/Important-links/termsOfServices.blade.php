@@ -31,7 +31,7 @@
                     </div>
 
                     <!-- Table of Contents -->
-                    {{-- <div class="toc-container">
+                    <div class="toc-container">
                         <h3 class="toc-title">فهرس المحتويات</h3>
                         <ul class="toc-list">
                             <li><a href="#introduction">مقدمة</a></li>
@@ -57,7 +57,7 @@
                             <li><a href="#liability">تحديد المسؤولية</a></li>
                             <li><a href="#miscellaneous">متفرقات</a></li>
                         </ul>
-                    </div> --}}
+                    </div>
 
                     <!-- Main Content -->
                     <div class="terms-section" id="introduction">
