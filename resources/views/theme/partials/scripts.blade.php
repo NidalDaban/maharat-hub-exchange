@@ -73,6 +73,9 @@
     document.addEventListener('DOMContentLoaded', function() {
         console.log('Invitation script loaded');
 
+        const invitationButtons = document.querySelectorAll('.send-invitation-btn');
+        if (!invitationButtons.length) return;
+
         // Handle invitation button clicks
         $(document).on('click', '.send-invitation-btn', function(e) {
             e.preventDefault();
@@ -220,6 +223,10 @@
     document.addEventListener('DOMContentLoaded', function() {
         console.log('Invitation reply script loaded');
 
+        // Only proceed if reply buttons exist
+        const replyButtons = document.querySelectorAll('.reply-btn');
+        if (!replyButtons.length) return;
+
         // Handle reply button clicks
         $(document).on('click', '.reply-btn', function() {
             const button = $(this);
@@ -325,6 +332,10 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const filterForm = document.getElementById('filterForm');
+        const usersContainer = document.getElementById('users-container');
+
+        // Exit if required elements don't exist
+        if (!filterForm || !usersContainer) return;
 
         // Function to handle form submission
         function submitForm() {
@@ -332,8 +343,8 @@
             const url = new URL(window.location.href);
 
             // Show loading indicator
-            document.getElementById('users-container').innerHTML =
-                '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">جار التحميل...</span></div></div>';
+            usersContainer.innerHTML =
+                '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>';
 
             fetch(url.pathname + '?' + new URLSearchParams(formData), {
                     headers: {
@@ -342,79 +353,86 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('users-container').innerHTML = data.html;
-                    document.getElementById('pagination-links').innerHTML = data.pagination;
+                    if (data.html) usersContainer.innerHTML = data.html;
 
-                    // Reinitialize any necessary JS for the new content
+                    const paginationContainer = document.getElementById('pagination-links');
+                    if (paginationContainer && data.pagination) {
+                        paginationContainer.innerHTML = data.pagination;
+                    }
+
                     initializeInvitationForms();
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    document.getElementById('users-container').innerHTML =
+                    usersContainer.innerHTML =
                         '<div class="col-12 text-center py-5"><h4>حدث خطأ أثناء جلب البيانات</h4></div>';
                 });
         }
 
-        // Handle form changes
-        filterForm.querySelectorAll('input[type="checkbox"], select[name="sort"], input[name="search"]')
-            .forEach(element => {
-                element.addEventListener('change', function() {
-                    submitForm();
-                });
+        // Handle form changes - with null check
+        const filterInputs = filterForm.querySelectorAll(
+            'input[type="checkbox"], select[name="sort"], input[name="search"]');
+        if (filterInputs.length) {
+            filterInputs.forEach(element => {
+                element.addEventListener('change', submitForm);
             });
+        }
 
-        // Handle search input with debounce
+        // Handle search input with debounce - with null check
         const searchInput = filterForm.querySelector('input[name="search"]');
-        let searchTimeout;
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                submitForm();
-            }, 500);
-        });
+        if (searchInput) {
+            let searchTimeout;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(submitForm, 500);
+            });
+        }
 
-        // Handle pagination clicks
+        // Handle pagination clicks - with container check
         document.addEventListener('click', function(e) {
-            if (e.target.closest('.pagination a')) {
-                e.preventDefault();
-                const url = e.target.closest('a').href;
+            const paginationLink = e.target.closest('.pagination a');
+            if (!paginationLink) return;
 
-                // Show loading indicator
-                document.getElementById('users-container').innerHTML =
-                    '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">جار التحميل...</span></div></div>';
+            e.preventDefault();
+            const url = paginationLink.href;
 
-                fetch(url, {
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        document.getElementById('users-container').innerHTML = data.html;
-                        document.getElementById('pagination-links').innerHTML = data.pagination;
+            usersContainer.innerHTML =
+                '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>';
 
-                        // Update URL without reload
-                        window.history.pushState({}, '', url);
+            fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.html) usersContainer.innerHTML = data.html;
 
-                        // Reinitialize any necessary JS for the new content
-                        initializeInvitationForms();
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        document.getElementById('users-container').innerHTML =
-                            '<div class="col-12 text-center py-5"><h4>حدث خطأ أثناء جلب البيانات</h4></div>';
-                    });
-            }
+                    const paginationContainer = document.getElementById('pagination-links');
+                    if (paginationContainer && data.pagination) {
+                        paginationContainer.innerHTML = data.pagination;
+                    }
+
+                    window.history.pushState({}, '', url);
+                    initializeInvitationForms();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    usersContainer.innerHTML =
+                        '<div class="col-12 text-center py-5"><h4>حدث خطأ أثناء جلب البيانات</h4></div>';
+                });
         });
 
-        // Function to reinitialize invitation forms
+        // Function to reinitialize invitation forms - with null check
         function initializeInvitationForms() {
-            document.querySelectorAll('.invitation-form').forEach(form => {
+            const invitationForms = document.querySelectorAll('.invitation-form');
+            if (!invitationForms.length) return;
+
+            invitationForms.forEach(form => {
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
                     const userName = form.getAttribute('data-username');
                     const formData = new FormData(form);
-                    const csrfToken = formData.get('_token');
 
                     Swal.fire({
                         title: 'هل أنت متأكد؟',
@@ -429,42 +447,236 @@
                             fetch(`{{ route('invitations.send') }}`, {
                                     method: 'POST',
                                     headers: {
-                                        'X-CSRF-TOKEN': csrfToken
+                                        'X-CSRF-TOKEN': formData.get('_token')
                                     },
                                     body: formData
                                 })
-                                .then(response => {
-                                    if (!response.ok) {
-                                        throw new Error('حدث خطأ في الإرسال');
-                                    }
-                                    return response.json();
-                                })
-                                .then(data => {
-                                    Swal.fire({
-                                        title: 'تم الإرسال!',
-                                        text: 'تم إرسال الدعوة بنجاح.',
-                                        icon: 'success',
-                                        confirmButtonText: 'حسناً'
-                                    });
-                                })
-                                .catch(error => {
-                                    Swal.fire({
-                                        title: 'خطأ!',
-                                        text: error.message,
-                                        icon: 'error',
-                                        confirmButtonText: 'حسناً'
-                                    });
-                                });
+                                .then(handleInvitationResponse)
+                                .catch(handleInvitationError);
                         }
                     });
                 });
             });
         }
+
+        function handleInvitationResponse(response) {
+            if (!response.ok) throw new Error('حدث خطأ في الإرسال');
+            return response.json();
+        }
+
+        function handleInvitationError(error) {
+            Swal.fire({
+                title: 'خطأ!',
+                text: error.message,
+                icon: 'error',
+                confirmButtonText: 'حسناً'
+            });
+        }
     });
 </script>
 
+
 {{-- Skills Pagination + Invitation Init --}}
 <script>
+    // Only run this code if we're on a page that needs it
+    if (document.querySelector('.invite-btn') || document.getElementById('users-container')) {
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // Only proceed if users container exists
+            const usersContainer = document.getElementById('users-container');
+            if (!usersContainer) return;
+
+            // Global invitation initialization function
+            function initializeInvitationForms() {
+                const inviteButtons = document.querySelectorAll('.invite-btn');
+                if (!inviteButtons.length) return; // Exit if no buttons found
+
+                inviteButtons.forEach(btn => {
+                    btn.removeEventListener('click', handleInviteClick);
+                    btn.addEventListener('click', handleInviteClick);
+                });
+            }
+
+            // Actual event handler
+            function handleInviteClick(e) {
+                e.preventDefault();
+                const userId = e.currentTarget.getAttribute('data-user-id');
+                console.log('Invitation clicked for user:', userId);
+
+                // Replace with your actual invitation logic
+                Swal.fire({
+                    title: 'إرسال دعوة',
+                    text: `هل تريد دعوة المستخدم ${userId}؟`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'نعم، أرسل الدعوة',
+                    cancelButtonText: 'إلغاء'
+                });
+            }
+
+            // Initialize on page load
+            initializeInvitationForms();
+
+            // Handle AJAX pagination
+            document.addEventListener('click', function(e) {
+                const link = e.target.closest('.pagination a');
+                if (!link) return;
+
+                const usersContainer = document.getElementById('users-container');
+                if (!usersContainer) return; // Exit if container doesn't exist
+
+                e.preventDefault();
+                const url = link.getAttribute('href');
+
+                usersContainer.innerHTML =
+                    '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>';
+
+                fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.html) usersContainer.innerHTML = data.html;
+                        if (data.pagination) {
+                            const paginationContainer = document.getElementById('pagination-links');
+                            if (paginationContainer) paginationContainer.innerHTML = data
+                                .pagination;
+                        }
+                        initializeInvitationForms();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        if (usersContainer) {
+                            usersContainer.innerHTML =
+                                '<div class="col-12 text-center py-5"><h4>حدث خطأ أثناء جلب البيانات</h4></div>';
+                        }
+                    });
+            });
+        });
+    }
+</script>
+
+
+{{-- One-Single Notification --}}
+<script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async></script>
+<script>
+    window.OneSignal = window.OneSignal || [];
+    OneSignal.push(function() {
+        OneSignal.init({
+            appId: '{{ config('services.onesignal.app_id') }}', // Use your OneSignal App ID here
+            notifyButton: {
+                enable: true
+            },
+            allowLocalhostAsSecureOrigin: true // For local dev with http
+        });
+
+        @auth
+        OneSignal.on('subscriptionChange', function(isSubscribed) {
+            if (isSubscribed) {
+                OneSignal.getUserId(function(playerId) {
+                    fetch("{{ route('onesignal.update') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            player_id: playerId
+                        })
+                    }).catch(err => console.error('Failed to update player ID:', err));
+                });
+            }
+        });
+    @endauth
+    });
+</script>
+
+<script>
+    function updateInvitationCount() {
+        fetch('{{ url('/invitations/count') }}')
+            .then(res => res.json())
+            .then(data => {
+                const badge = document.getElementById('invitation-count');
+                if (data.count > 0) {
+                    badge.textContent = data.count;
+                    badge.style.display = 'inline';
+                } else {
+                    badge.style.display = 'none';
+                }
+            })
+            .catch(err => console.error('Failed to fetch invitation count:', err));
+    }
+
+    @auth
+    updateInvitationCount();
+    setInterval(updateInvitationCount, 15000); // refresh every 15 seconds
+    @endauth
+</script>
+
+
+
+{{-- <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
+<script>
+    window.OneSignal = window.OneSignal || [];
+    OneSignal.push(function() {
+        OneSignal.init({
+            appId: '{{ config('services.onesignal.app_id') }}', // ✅ FIXED: proper JS string
+            notifyButton: {
+                enable: true
+            },
+            allowLocalhostAsSecureOrigin: true
+        });
+
+        @auth
+        OneSignal.on('subscriptionChange', function(isSubscribed) {
+            if (isSubscribed) {
+                OneSignal.getUserId(function(playerId) {
+                    fetch("{{ route('onesignal.update') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            player_id: playerId
+                        })
+                    });
+                });
+            }
+        });
+    @endauth
+    });
+</script>
+<script>
+    function updateInvitationCount() {
+        fetch('{{ url('/invitations/count') }}')
+            .then(res => res.json())
+            .then(data => {
+                const badge = document.getElementById('invitation-count');
+                if (data.count > 0) {
+                    badge.textContent = data.count;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            });
+    }
+
+    @auth
+    updateInvitationCount();
+    setInterval(updateInvitationCount, 15000); // Check every 15s
+    @endauth
+</script> --}}
+
+
+
+
+
+
+{{-- Skills Pagination + Invitation Init --}}
+{{-- <script>
     // Global invitation initialization function
     function initializeInvitationForms() {
         // Remove old listeners to prevent duplication
@@ -518,41 +730,72 @@
                 });
         }
     });
-</script>
+</script> --}}
 
-
-{{-- Contact us --}}
-<script>
+{{-- contact us --}}
+{{-- <script>
     $(document).ready(function() {
-        // Handle form submission
         $('form').on('submit', function(e) {
             e.preventDefault();
             const form = $(this);
+            const submitBtn = form.find('button[type="submit"]');
 
             // Show loading state
-            form.find('button[type="submit"]').prop('disabled', true).html(`
+            submitBtn.prop('disabled', true).html(`
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                 جاري الإرسال...
             `);
 
-            // Submit form via AJAX
             $.ajax({
                 url: form.attr('action'),
                 method: form.attr('method'),
                 data: form.serialize(),
                 success: function(response) {
-                    // If form was submitted with AJAX (optional)
-                    if (response.redirect) {
-                        window.location.href = response.redirect;
+                    submitBtn.prop('disabled', false).text('إرسال');
+
+                    if (response.success) {
+                        form[0].reset(); // Clear the form
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'تم الإرسال',
+                            text: response.message,
+                            confirmButtonText: 'حسنًا'
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'تنبيه',
+                            text: 'This is for test',
+                            confirmButtonText: 'موافق'
+                        });
                     }
                 },
                 error: function(xhr) {
-                    // Handle errors if using AJAX
-                    form.find('button[type="submit"]').prop('disabled', false).text(
-                        'إرسال');
-                    alert('حدث خطأ أثناء إرسال النموذج. يرجى المحاولة مرة أخرى.');
+                    submitBtn.prop('disabled', false).text('إرسال');
+
+                    if (xhr.status === 422) {
+                        const errors = xhr.responseJSON.errors;
+                        let errorText = '';
+                        for (let field in errors) {
+                            errorText += `${errors[field].join(' ')}\n`;
+                        }
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ في التحقق',
+                            text: errorText,
+                            confirmButtonText: 'موافق'
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ',
+                            text: 'حدث خطأ أثناء إرسال النموذج. يرجى المحاولة مرة أخرى.',
+                            confirmButtonText: 'موافق'
+                        });
+                    }
                 }
             });
         });
     });
-</script>
+</script> --}}

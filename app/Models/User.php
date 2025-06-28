@@ -73,7 +73,6 @@ class User extends Authenticatable
             : 'https://cdn-icons-png.flaticon.com/512/4140/4140048.png';
     }
 
-
     public function profileCompletionPercentage()
     {
         $totalFields = 0;
@@ -87,6 +86,7 @@ class User extends Authenticatable
             'gender',
             'country_id',
             'about_me',
+            'image_path',
         ];
 
         foreach ($personalInfoFields as $field) {
@@ -96,18 +96,19 @@ class User extends Authenticatable
             }
         }
 
-        $totalFields += 2;
+        $totalFields++;
         if ($this->skills()->count() > 0) {
-            $filledFields++;
+            $hasQualifications = $this->skills()->wherePivot('description', '!=', null)->exists();
+            $filledFields += $hasQualifications ? 1 : 0.5;
         }
+
+        $totalFields++;
         if ($this->languages()->count() > 0) {
             $filledFields++;
         }
 
         return $totalFields > 0 ? round(($filledFields / $totalFields) * 100) : 0;
     }
-
-
     /**
      * Invitations sent by this user.
      */
@@ -133,36 +134,30 @@ class User extends Authenticatable
     {
         return $this->hasMany(Review::class, 'receved_id');
     }
+}
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
 
-    public function conversations()
-    {
-        return $this->belongsToMany(Conversation::class)
-            ->withPivot('is_active', 'left_at', 'body')
-            ->withTimestamps();
-    }
+// /**
+    //  * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    //  */
 
     // public function conversations()
     // {
     //     return $this->belongsToMany(Conversation::class)
-    //         ->withPivot('is_active', 'left_at')
+    //         ->withPivot('is_active', 'left_at', 'body')
     //         ->withTimestamps();
     // }
 
-    public function messages()
-    {
-        return $this->hasMany(Message::class);
-    }
+    // public function messages()
+    // {
+    //     return $this->hasMany(Message::class);
+    // }
 
-    public function hasConversationWith($userId)
-    {
-        return $this->conversations()
-            ->whereHas('users', function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            })
-            ->exists();
-    }
-}
+    // public function hasConversationWith($userId)
+    // {
+    //     return $this->conversations()
+    //         ->whereHas('users', function ($query) use ($userId) {
+    //             $query->where('user_id', $userId);
+    //         })
+    //         ->exists();
+    // }

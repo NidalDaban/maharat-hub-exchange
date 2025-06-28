@@ -40,8 +40,17 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css" rel="stylesheet">
     {{-- ============================== --}}
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+
     <!-- Main CSS File -->
     <link href="{{ asset('assets') }}/css/main.css" rel="stylesheet">
+
+    <style>
+        #faqAccordion {
+            color: #000 !important;
+        }
+    </style>
 
     <style>
         #google-anchor {
@@ -58,7 +67,7 @@
     <style>
         @media (max-width: 768px) {
             .dropdown-menu.show {
-                position: relative !important;
+                position: absolute !important;
                 transform: none !important;
                 inset: auto !important;
             }
@@ -277,8 +286,6 @@
 
         /* #3498db */
     </style>
-
-
 
     <style>
         /* Add this to your existing styles */
@@ -1057,178 +1064,84 @@
         }
     </style>
 
+
+    <style>
+        #invitation-count {
+            min-width: 16px;
+            height: 16px;
+            font-size: 0.65rem;
+            padding: 0 4px;
+            line-height: 16px;
+        }
+    </style>
+
+
+    {{-- avatar with alert --}}
     {{-- <style>
-        @media (max-width: 768px) {
-            .profile-header {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .profile-avatar {
-                margin-bottom: 1rem;
-            }
-
-            .profile-info {
-                text-align: center !important;
-            }
-
-            .profile-completion {
-                margin: 1rem auto !important;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .profile-card {
-                padding: 1rem !important;
-            }
-
-            .section-title {
-                font-size: 1.2rem;
-            }
-
-            .skill-item {
-                padding: 0.75rem;
-            }
-        }
-    </style> --}}
-
-
-
-    {{-- Search the coach in the trainers page
-    <style>
-        /* Trainer Search Styles */
-        .trainer-search-container {
-            background: #fff;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        }
-
-        .trainer-search-group {
+        /* Notification badge styles */
+        .position-relative {
             position: relative;
-            direction: rtl;
         }
 
-        .trainer-search-input {
-            padding: 1rem 1.5rem;
-            border: 2px solid #e9ecef;
-            border-radius: 8px !important;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            text-align: right;
-        }
-
-        .trainer-search-input:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-            outline: none;
-        }
-
-        .trainer-search-btn {
+        .position-absolute {
             position: absolute;
-            left: 8px;
-            top: 50%;
-            /* transform: translateY(-10%); */
-            background: #3498db;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 0.75rem 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
         }
 
-        .trainer-search-btn:hover {
-            background: #2980b9;
+        .top-0 {
+            top: 0;
         }
 
-        .search-tags {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            direction: rtl;
+        .start-100 {
+            left: 100%;
         }
 
-        .tag {
-            background: #f8f9fa;
-            color: #3498db;
-            padding: 0.35rem 0.9rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            text-decoration: none;
-            transition: all 0.2s ease;
+        .translate-middle {
+            transform: translate(-50%, -50%);
         }
 
-        .tag:hover {
-            background: #e9f5ff;
-            color: #1a6bac;
+        .translate-middle-x {
+            transform: translateX(-50%);
         }
 
-        /* RTL Adjustments */
-        .trainer-search-btn {
-            left: auto;
-            right: 8px;
-            flex-direction: row-reverse;
+        .translate-middle-y {
+            transform: translateY(-50%);
         }
 
-        .trainer-search-input {
-            padding-left: 130px;
-            padding-right: 1.5rem;
-        }
-
-        .search-tags span {
-            margin-left: 0.5rem;
-            margin-right: 0;
-        }
-    </style> --}}
-
-    {{-- Growing Community Section Styles
-    <style>
-        .community {
-            padding: 80px 0;
-        }
-
-        .community .icon-box {
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
-            display: flex;
+        .badge {
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 0.75em;
+            min-width: 1.5em;
+            height: 1.5em;
+            padding: 0 0.25em;
+            border-radius: 9999px;
         }
 
-        .community-features {
-            border-right: 3px solid #3498db;
-            padding-right: 20px;
+        .rounded-pill {
+            border-radius: 50rem !important;
         }
 
-        /* RTL Adjustments */
-        .community-features {
-            border-right: none;
-            border-left: 3px solid #3498db;
-            padding-right: 0;
-            padding-left: 20px;
+        .bg-danger {
+            background-color: #dc3545;
+            color: white;
         }
 
-        .feature-item {
-            text-align: right;
+        .me-1 {
+            margin-right: 0.25rem !important;
         }
 
-        .feature-item .icon-box {
-            margin-right: 0;
-            margin-left: 1rem;
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
         }
     </style> --}}
 
-    <!-- =======================================================
-  * Template Name: Mentor
-  * Template URL: https://bootstrapmade.com/mentor-free-education-bootstrap-theme/
-  * Updated: Aug 07 2024 with Bootstrap v5.3.3
-  * Author: BootstrapMade.com
-  * License: https://bootstrapmade.com/license/
-  ======================================================== -->
 </head>

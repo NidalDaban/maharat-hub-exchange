@@ -62,6 +62,21 @@ Route::middleware('auth')->group(function () {
     Route::get('/invitation/check-eligibility', [InvitationController::class, 'checkEligibility'])
         ->name('invitations.check');
 
+    // ================= Notifications for invitations =====================
+    Route::post('/onesignal/update', function (\Illuminate\Http\Request $request) {
+        $user = \App\Models\User::findOrFail(auth()->id());
+        $user->update(['onesignal_player_id' => $request->player_id]);
+
+        return response()->json(['message' => 'Player ID updated']);
+    })->name('onesignal.update')->middleware('auth');
+
+    Route::get('/invitations/count', function () {
+        $count = \App\Models\Invitation::where('destination_user_id', auth()->id())
+            ->whereNull('reply')->count();
+
+        return response()->json(['count' => $count]);
+    })->middleware('auth');
+
     // ================ Conversations ===============
     Route::prefix('conversations')->name('conversations.')->group(function () {
         Route::get('/', [ConversationController::class, 'index'])->name('index');
@@ -73,6 +88,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/{conversation}/review', [ConversationController::class, 'storeReview'])->name('review.store');
     });
 });
+
+
+
+
 
 // Route::get('/invitation/check-eligibility', [InvitationController::class, 'checkEligibility'])->name('invitations.check');
 

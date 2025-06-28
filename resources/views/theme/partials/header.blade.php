@@ -8,8 +8,36 @@
                 <div class="dropdown">
                     <a href="#" class="d-flex flex-column align-items-center text-decoration-none dropdown-toggle"
                         id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="{{ auth()->user()->image_url }}" alt="صورة المستخدم" width="48" height="48"
+                        {{-- <img src="{{ auth()->user()->image_url }}" alt="صورة المستخدم" width="48" height="48"
+                            class="rounded-circle mb-1"> --}}
+
+                        {{-- <div class="position-relative">
+                            <img src="{{ auth()->user()->image_url }}" alt="صورة المستخدم" width="48" height="48"
                             class="rounded-circle mb-1">
+                            
+                            <span id="invitation-count"
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                style="font-size: 0.6rem; display: none;">
+                                0
+                            </span>
+                            <i class="fas fa-bell fa-lg text-dark"></i>
+                        </div> --}}
+
+                        <div class="d-flex align-items-center position-relative">
+                            <img src="{{ auth()->user()->image_url }}" alt="صورة المستخدم" width="48" height="48"
+                                class="rounded-circle mb-1 me-2">
+
+                            <div class="position-relative" style="display: inline-block;">
+                                <i class="fas fa-bell fa-lg text-dark"></i> {{-- FontAwesome bell --}}
+                                <span id="invitation-count"
+                                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                    style="font-size: 0.6rem; display: none;">
+                                    0
+                                </span>
+                            </div>
+                        </div>
+
+                        
 
                         <span class="d-none d-md-inline text-center"
                             style="font-size: 0.8rem;">{{ auth()->user()->fullName() ?: auth()->user()->email }}</span>

@@ -3,7 +3,7 @@
 
 @include('theme.partials.head')
 
-<body class="index-page">
+<body class="index-page" style="color: #37423b !important;">
 
     @include('theme.partials.header')
 

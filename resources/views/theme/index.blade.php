@@ -214,7 +214,7 @@
         <div class="container" data-aos="fade-up">
 
             <div class="section-title text-right">
-                <h2>الأسئلة الشائعة</h2>
+                <h2 id="faq-header">الأسئلة الشائعة</h2>
                 <p>احصل على إجابات للأسئلة الشائعة حول مهارات هب</p>
             </div>
 
@@ -227,7 +227,7 @@
                         <div class="accordion-item">
                             <h3 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#faq1">
+                                    data-bs-target="#faq1" style="color: #37423b !important">
                                     كيف يعمل تبادل المهارات؟
                                 </button>
                             </h3>
@@ -244,7 +244,7 @@
                         <div class="accordion-item">
                             <h3 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#faq2">
+                                    data-bs-target="#faq2" style="color: #37423b !important">
                                     هل مهارات هب مجانية تماماً؟
                                 </button>
                             </h3>
@@ -261,7 +261,7 @@
                         <div class="accordion-item">
                             <h3 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#faq3">
+                                    data-bs-target="#faq3" style="color: #37423b !important">
                                     كيف أكسب وأستبدل النقاط؟
                                 </button>
                             </h3>
@@ -279,7 +279,7 @@
                         <div class="accordion-item">
                             <h3 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#faq4">
+                                    data-bs-target="#faq4" style="color: #37423b !important">
                                     ماذا لو أردت تعليم شخص ما، ولكنه لا يستطيع تقديم أي شيء في المقابل؟
                                 </button>
                             </h3>
@@ -297,7 +297,7 @@
                         <div class="accordion-item">
                             <h3 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#faq5">
+                                    data-bs-target="#faq5" style="color: #37423b !important">
                                     كيف تتحقق مهارات هب من مهارات المستخدم؟
                                 </button>
                             </h3>
@@ -314,7 +314,7 @@
                         <div class="accordion-item">
                             <h3 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#faq6">
+                                    data-bs-target="#faq6" style="color: #37423b !important">
                                     متى سيتم إطلاق مهارات هب؟
                                 </button>
                             </h3>
@@ -331,7 +331,7 @@
                         <div class="accordion-item">
                             <h3 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#faq7">
+                                    data-bs-target="#faq7" style="color: #37423b !important">
                                     ما نوع المهارات التي يمكن تبادلها؟
                                 </button>
                             </h3>

@@ -52,37 +52,19 @@ class InvitationController extends Controller
         }
 
         try {
-            Invitation::create([
+            $invitation = Invitation::create([
                 'source_user_id' => $user->id,
                 'destination_user_id' => $destinationId,
                 'date_time' => now(),
             ]);
+
+            event(new \App\Events\InvitationSent($invitation));
 
             return response()->json(['message' => 'تم إرسال الدعوة بنجاح!']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'حدث خطأ أثناء إرسال الدعوة.'], 500);
         }
     }
-
-
-    // public function reply(Request $request, Invitation $invitation)
-    // {
-    //     \Log::info('Reply request', $request->all());
-
-    //     $request->validate([
-    //         'reply' => 'required|in:قبول,رفض',
-    //     ]);
-
-    //     if ($invitation->destination_user_id !== auth()->id()) {
-    //         abort(403, 'غير مصرح لك بالرد على هذه الدعوة.');
-    //     }
-
-    //     $invitation->update([
-    //         'reply' => $request->reply,
-    //     ]);
-
-    //     return back()->with('success', 'تم تحديث حالة الدعوة.');
-    // }
 
     public function reply(Request $request, Invitation $invitation)
     {

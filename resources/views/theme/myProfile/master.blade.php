@@ -370,9 +370,13 @@
                                             <button class="btn btn-primary me-2" id="uploadImageBtn">
                                                 <i class="fas fa-camera me-1"></i> تغيير الصورة
                                             </button>
-                                            <button class="btn btn-danger" id="removeImageBtn">
-                                                <i class="fas fa-trash me-1"></i> إزالة الصورة
-                                            </button>
+
+                                            @if ($user->image_path)
+                                                <button class="btn btn-danger" id="removeImageBtn">
+                                                    <i class="fas fa-trash me-1"></i> إزالة الصورة
+                                                </button>
+                                            @endif
+
                                         </div>
                                     </div>
 
@@ -845,8 +849,9 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        function uploadProfileImage(file) {
-            // Validate image type
+        async function uploadProfileImage(file) {
+            if (!file) return;
+
             const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
             if (!validTypes.includes(file.type)) {
                 Swal.fire({
@@ -855,10 +860,9 @@
                     icon: 'error',
                     confirmButtonColor: '#4e73df'
                 });
-                return;
+                return false;
             }
 
-            // Validate image size (max 5MB)
             const maxSize = 5 * 1024 * 1024; // 5MB
             if (file.size > maxSize) {
                 Swal.fire({
@@ -867,14 +871,13 @@
                     icon: 'error',
                     confirmButtonColor: '#4e73df'
                 });
-                return;
+                return false;
             }
 
             const formData = new FormData();
             formData.append('profile_image', file);
             formData.append('_token', '{{ csrf_token() }}');
 
-            // Show loading indicator
             Swal.fire({
                 title: 'جاري رفع الصورة',
                 html: 'الرجاء الانتظار...',
@@ -884,40 +887,42 @@
                 }
             });
 
-            axios.post('/profile/upload-image', formData, {
+            try {
+                const response = await axios.post('/profile/upload-image', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
-                })
-                .then(response => {
-                    Swal.fire({
-                        title: 'تم!',
-                        text: 'تم تحديث صورة الملف الشخصي بنجاح',
-                        icon: 'success',
-                        confirmButtonColor: '#4e73df'
-                    });
-
-                    // Update both images with cache busting
-                    if (response.data.image_url) {
-                        const newImageUrl = response.data.image_url + '?' + new Date().getTime();
-                        $('#profileImage, #sidebarProfileImage').attr('src', newImageUrl);
-                    }
-
-                    // Refresh the page to update progress bar
-                    location.reload();
-                })
-                .catch(error => {
-                    let errorMessage = 'حدث خطأ أثناء تحديث الصورة';
-                    if (error.response && error.response.data && error.response.data.message) {
-                        errorMessage = error.response.data.message;
-                    }
-                    Swal.fire({
-                        title: 'خطأ!',
-                        text: errorMessage,
-                        icon: 'error',
-                        confirmButtonColor: '#4e73df'
-                    });
                 });
+
+                Swal.fire({
+                    title: 'تم!',
+                    text: 'تم تحديث صورة الملف الشخصي بنجاح',
+                    icon: 'success',
+                    confirmButtonColor: '#4e73df'
+                });
+
+                if (response.data.image_url) {
+                    const newImageUrl = response.data.image_url + '?' + new Date().getTime();
+                    $('#profileImage, #sidebarProfileImage').attr('src', newImageUrl);
+                    setTimeout(() => location.reload(), 1000); // Wait 1 second before reload
+                }
+
+                location.reload();
+                return true;
+
+            } catch (error) {
+                let errorMessage = 'حدث خطأ أثناء تحديث الصورة';
+                if (error.response?.data?.message) {
+                    errorMessage = error.response.data.message;
+                }
+                Swal.fire({
+                    title: 'خطأ!',
+                    text: errorMessage,
+                    icon: 'error',
+                    confirmButtonColor: '#4e73df'
+                });
+                return false;
+            }
         }
 
         $(document).ready(function() {
@@ -1269,21 +1274,21 @@
 
                 const totalPages = Math.ceil(filteredLanguages.length / languagesPerPage);
                 let paginationHtml = `
-            <li class="page-item ${currentLanguagesPage === 1 ? 'disabled' : ''}" id="languagesPrevPage">
-                <a class="page-link" href="#" tabindex="-1">السابقة</a>
-            </li>`;
-
-                for (let i = 1; i <= totalPages; i++) {
-                    paginationHtml += `
-                <li class="page-item ${i === currentLanguagesPage ? 'active' : ''}">
-                    <a class="page-link languages-page-link" href="#" data-page="${i}">${i}</a>
+                <li class="page-item ${currentLanguagesPage === 1 ? 'disabled' : ''}" id="languagesPrevPage">
+                    <a class="page-link" href="#" tabindex="-1">السابقة</a>
                 </li>`;
-                }
 
-                paginationHtml += `
-            <li class="page-item ${currentLanguagesPage === totalPages ? 'disabled' : ''}" id="languagesNextPage">
-                <a class="page-link" href="#">التالية</a>
-            </li>`;
+                    for (let i = 1; i <= totalPages; i++) {
+                        paginationHtml += `
+                    <li class="page-item ${i === currentLanguagesPage ? 'active' : ''}">
+                        <a class="page-link languages-page-link" href="#" data-page="${i}">${i}</a>
+                    </li>`;
+                    }
+
+                    paginationHtml += `
+                <li class="page-item ${currentLanguagesPage === totalPages ? 'disabled' : ''}" id="languagesNextPage">
+                    <a class="page-link" href="#">التالية</a>
+                </li>`;
 
                 $('.pagination').last().html(paginationHtml);
             }
@@ -1469,18 +1474,18 @@
                                 .then(response => response.json())
                                 .then(data => {
                                     if (data.success) {
-                                        const defaultImage = '/images/default-profile.png';
+                                        // Use gender from server
+                                        const userGender = '{{ auth()->user()->gender }}';
+                                        const defaultImage = userGender === 'female' ?
+                                            'https://cdn-icons-png.flaticon.com/512/4140/4140047.png' :
+                                            'https://cdn-icons-png.flaticon.com/512/4140/4140048.png';
 
-                                        // Update profile image preview
+                                        // Update preview and sidebar image
                                         if (profileImage) profileImage.src = defaultImage;
+                                        if (sidebarImage) sidebarImage.src = defaultImage +
+                                            '?v=' + new Date().getTime();
 
-                                        // Update sidebar image
-                                        if (sidebarImage) {
-                                            sidebarImage.src = defaultImage + '?v=' + new Date()
-                                                .getTime();
-                                        }
-
-                                        // Reset input if needed
+                                        // Reset file input if needed
                                         const fileInput = document.getElementById('imageInput');
                                         if (fileInput) fileInput.value = '';
 
